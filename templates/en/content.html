@@ -1,0 +1,58 @@
+<script>
+function setDepth(selobject)
+{
+    if (window.XMLHttpRequest)
+    {
+        // AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
+        xmlhttp=new XMLHttpRequest();
+    }
+    else
+    {
+        // AJAX mit IE6, IE5
+        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    xmlhttp.onreadystatechange=function()
+    {
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {
+            // document.getElementById("labeldepth").innerHTML="Depth (gespeichert):";
+        } else {
+        	  document.getElementById("labeldepth").innerHTML="Depth <span style=\"color: #ff0000;\":";
+        }
+    }
+    document.getElementById("labeldepth").innerHTML="Depth:";
+    newdepth = selobject.options[selobject.selectedIndex].value;
+    xmlhttp.open("GET","/admin/plugins/<!--$psubfolder-->/setDepth.cgi?depth=" + newdepth,true);
+    xmlhttp.send();
+}
+</script>
+
+<div role=\"main\" class=\"ui-content\">
+<div class=\"ui-body ui-body-a ui-corner-all loxberry-logo\">
+<div style=\"margin: 5%;\">
+
+<h2>Settings</h2>
+									<form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
+											<div class="form-group">
+												<table class="formtable" border="0" width="100%">
+											</table>
+										</div>
+									</form>
+<h2>Configuration hints</h2>
+									<form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
+										<input type="hidden" id="lang" name="lang" value="<!--$lang-->">
+											<div class="form-group">
+												<table class="formtable" border="0" width="100%">
+											</table>
+										</div>
+									</form>
+<script>
+		var $messages = $('#form-error-message');
+		$.validate({
+			modules : 'security',
+			errorMessagePosition : $messages,
+		});
+</script>
+</div>
+</div>
+</div>
