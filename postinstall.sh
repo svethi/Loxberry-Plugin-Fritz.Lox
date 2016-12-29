@@ -7,3 +7,8 @@ ARGV5=$5 # Fifth argument is Base folder of LoxBerry
 /bin/sed -i "s:REPLACEINSTALLFOLDER:$ARGV5:g" $ARGV5/system/daemons/plugins/$ARGV2
 /bin/sed -i "s:REPLACEFOLDERNAME:$ARGV3:g" $ARGV5/webfrontend/cgi/plugins/$ARGV2/bin/callmonitor
 /bin/sed -i "s:REPLACEINSTALLFOLDER:$ARGV5:g" $ARGV5/webfrontend/cgi/plugins/$ARGV2/bin/callmonitor
+
+/bin/echo "#############################################################################################"
+/bin/echo "#  Nach der Installation bitte die Einstellungen zu allen MiniServern anpassen und speichern."
+/bin/echo "#  Danach den LoxBerry Neustarten."
+/bin/echo "#############################################################################################"

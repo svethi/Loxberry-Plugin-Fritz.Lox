@@ -11,16 +11,11 @@ use Time::HiRes;
 use MIME::Base64;
 use strict;
  
-our $psubfolder = "REPLACEFOLDERNAME";
-my $home = "REPLACEINSTALLFOLDER";
+our $psubfolder = "REPLACEFOLDERNAME";   #"fritzlox";
+my $home = "REPLACEINSTALLFOLDER";  #"/opt/loxberry";				
 my $cfg = new Config::Simple("$home/config/system/general.cfg");
 my $pcfg = new Config::Simple("$home/config/plugins/$psubfolder/fritzlox.conf");
 my $FRITZBOX=$pcfg->param("general.FritzboxIP");
-my $MiniServer=$cfg->param("MINISERVER1.IPADDRESS");
-my $MSPort=$pcfg->param("general.MSUDPPort");
-my $MSWebPort=$cfg->param("MINISERVER1.PORT");
-my $MSUser=$cfg->param("MINISERVER1.ADMIN");
-my $MSPass=$cfg->param("MINISERVER1.PASS");
 my $datum;
 my $Command;
 my $ConnID;
@@ -29,14 +24,74 @@ my $Recipient;
 my $Line;
 my $extension;
 my $duration;
-my $req;
 my $Debug;
 my $count;
 
 my $ua = LWP::UserAgent->new;
 
-$Debug = 2;
- 
+$Debug = 1;
+
+sub senddata {
+	my $txudp = shift;
+	my $txCaller = shift;
+	my $txRecipient = shift;
+	my $ConnID = shift;
+	my $MiniServer;
+	my $MSPort;
+	my $MSenabled;
+	my $MSWebPort;
+	my $MSUser;
+	my $MSPass;
+	my $MSName;
+	my $req;
+	
+	unless( defined($ConnID) or length($txudp) ){
+		if ($Debug !=0) {print "Parameterfehler -> es werden keine Daten gesendet";}
+	} else {
+		for (my $i = 1; $i <= $cfg->param('BASE.MINISERVERS');$i++) {
+			$MSenabled = $pcfg->param("MINISERVER$i.SendData");
+			if (length($MSenabled) == 0) {$MSenabled = 0;}
+			if ($MSenabled == 1) {
+				$MiniServer=$cfg->param("MINISERVER$i.IPADDRESS");
+				$MSPort=$pcfg->param("MINISERVER$i.UDPPort");
+				if (length($MSPort) == 0) {$MSPort = 7000;}
+				$MSWebPort=$cfg->param("MINISERVER$i.PORT");
+				$MSUser=$cfg->param("MINISERVER$i.ADMIN");
+				$MSPass=$cfg->param("MINISERVER$i.PASS");
+				$MSName=$cfg->param("MINISERVER$i.NAME");
+				if ($Debug > 1) {print "Daten an MiniServer $MSName-$MiniServer:$MSPort senden.\n";}
+				my $mssock = new IO::Socket::INET (
+				PeerAddr => $MiniServer,
+				PeerPort => $MSPort,
+				Proto => 'udp',
+				Type => SOCK_DGRAM
+				);
+				if ($mssock) {
+				  if (length($Caller)) {
+						if ($Debug != 0) {print "Caller ($txCaller) auf Leitung $ConnID an $MSName senden.\n";}
+						$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMCaller$ConnID/$txCaller");
+						if ($Debug > 1) {printf "%s\n", $req->content;}
+					}
+					if (length($txRecipient)) {
+						if ($Debug !=0) {print "Recipient ($txRecipient) auf Leitung $ConnID an $MSName senden.\n";}
+						$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMRec$ConnID/$txRecipient");
+						if ($Debug > 1) {printf "%s\n", $req->content;}
+					}
+					$mssock->send($txudp);
+					$mssock->close();
+					Time::HiRes::sleep(0.5);
+					if ($Debug > 1) {print "Impuls senden\n";}
+					$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMImp/Pulse");
+					if ($Debug > 1) {print "Impuls gesendet\n";}
+				} else {
+					if ($Debug !=0) {print "keine UDP-Verbindung zu $MiniServer:$MSPort.\n";}
+				}
+				undef($mssock);
+			}
+		}
+	}
+}
+
 my $sock;
 
 if ( $FRITZBOX eq "" ) {
@@ -50,113 +105,34 @@ do {
 	if (!$sock) {
 		print "keine Verbindung zur Fritzbox -> Verbindung aufbauen\n";
 		$sock = new IO::Socket::INET (
-        		PeerAddr => $FRITZBOX,
-        		PeerPort => '1012',
-        		Proto => 'tcp',
-			Blocking => 0,
-			Timeout => 60,
+						PeerAddr => $FRITZBOX,
+						PeerPort => '1012',
+						Proto => 'tcp',
+						Blocking => 0,
+						Timeout => 60,
         		);
         		#die "Could not create socket: $!\n" unless $sock;
 	}
 	while(<$sock>) {
-		if ($Debug > 1) {printf "%s\n",$_;}
-	        if ($_ =~ /RING/){
-			if ($Debug != 0 ) {print "Eingehender Anruf\n";}
-	                #my @args = ($EXTPRO, $_, $TV);
-	                #system(@args);
+		if ($Debug > 1) {printf "%s",$_;}
+		if ($_ =~ /RING/){
 			($datum,$Command,$ConnID,$Caller,$Recipient,$Line) = split(";", $_);
-			my $mssock = new IO::Socket::INET (
-			PeerAddr => $MiniServer,
-			PeerPort => $MSPort,
-			Proto => 'udp',
-			Type => SOCK_DGRAM
-			);
-			#die "Could not create socket: $!\n" unless $mssock;
-			if ($mssock) {
-				if ($Debug != 0) {print "Caller ($Caller) auf Leitung $ConnID senden.\n";}
-				$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMCaller$ConnID/$Caller");
-				if ($Debug > 1) {printf "%s\n", $req->content;}
-				if ($Debug !=0) {print "Recipient ($Recipient) auf Leitung $ConnID senden.\n";}
-				$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMRec$ConnID/$Recipient");
-				if ($Debug > 1) {printf "%s\n", $req->content;}
-				$mssock->send("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0");
-				$mssock->close();
-				Time::HiRes::sleep(0.5);
-				if ($Debug > 1) {print "Impuls senden\n";}
-				$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMImp/Pulse");
-				if ($Debug > 1) {print "Impuls gesendet\n";}
-			}
-			undef($mssock);
-	        } elsif ($_ =~ /CALL/){
-	                #my @args = ($EXTPRO, $_, $TV);
-	                #system(@args);
-	                ($datum,$Command,$ConnID,$extension,$Caller,$Recipient,$Line) = split(";", $_);
+			if ($Debug != 0 ) {print "Eingehender Anruf auf Leitung $ConnID.\n";}
+			senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Recipient,$ConnID);
+		} elsif ($_ =~ /CALL/){
+			($datum,$Command,$ConnID,$extension,$Caller,$Recipient,$Line) = split(";", $_);
 			if ($Debug !=0 ) {print "Ausgehender Anruf auf Leitung $ConnID.\n";}
-	                my $mssock = new IO::Socket::INET (
-	                PeerAddr => $MiniServer,
-	                PeerPort => $MSPort,
-	                Proto => 'udp',
-	                Type => SOCK_DGRAM
-	                );
-	                #die "Could not create socket: $!\n" unless $mssock;
-			if ($mssock) {
-				if ($Debug !=0) {print "Caller ($Caller) auf Leitung $ConnID senden.\n";}
-                                $req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMCaller$ConnID/$Caller");
-				if ($Debug > 1) {printf "%s\n", $req->content;}
-				if ($Debug !=0) {print "Recipient ($Recipient) auf Leitung $ConnID senden.\n";} 
-                                $req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMRec$ConnID/$Recipient");
-				if ($Debug > 1) {printf "%s\n", $req->content;}
-	                	$mssock->send("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;$extension;3;0");
-	                	$mssock->close();
-				Time::HiRes::sleep(0.5);
-				if ($Debug > 1) {print "Impuls senden\n";}
-				$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMImp/Pulse");
-				if ($Debug > 1) {print "Impuls gesendet\n";}
-			}
-	                undef($mssock);
-	        } elsif ($_ =~ /;CONNECT/){
+			senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;$extension;3;0",$Caller,$Recipient,$ConnID);
+		} elsif ($_ =~ /;CONNECT/){
 			($datum,$Command,$ConnID,$extension,$Caller) = split(";", $_);
 			if ($Debug != 0 ) {print "Verbindung auf Leitung $ConnID verbunden.\n";}
-			my $mssock = new IO::Socket::INET (
-			PeerAddr => $MiniServer,
-			PeerPort => $MSPort,
-			Proto => 'udp',
-			Type => SOCK_DGRAM
-			);
-			#die "Could not create socket: $!\n" unless $mssock;
-			if ($mssock) {
-				if ($Debug !=0) {print "Caller ($Caller) auf Leitung $ConnID senden.\n";}
-                                $req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMCaller$ConnID/$Caller");
-				if ($Debug > 1) {printf "%s\n", $req->content;}
-				$mssock->send("$datum;callmonitor;$ConnID;$Caller;0;0;$extension;2;0");
-				$mssock->close();
-				Time::HiRes::sleep(0.5);
-				if ($Debug > 1) {print "Impuls senden\n";}
-				$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMImp/Pulse");
-				if ($Debug > 1) {print "Impuls gesendet\n";}
-			}
-			undef($mssock);
-	        } elsif ($_ =~ /DISCONNECT/){
-	                ($datum,$Command,$ConnID,$duration) = split(";", $_);
+			senddata("$datum;callmonitor;$ConnID;$Caller;0;0;$extension;2;0",$Caller,"",$ConnID);
+		} elsif ($_ =~ /DISCONNECT/){
+			($datum,$Command,$ConnID,$duration) = split(";", $_);
 			if ($Debug != 0 ) {print "Verbindung auf Leitung $ConnID beendet.\n";}
-	                my $mssock = new IO::Socket::INET (
-	                PeerAddr => $MiniServer,
-	                PeerPort => $MSPort,
-	                Proto => 'udp',
-	                Type => SOCK_DGRAM
-	                );
-	                #die "Could not create socket: $!\n" unless $mssock;
-			if ($mssock) {
-	                	$mssock->send("$datum;callmonitor;$ConnID;0;0;0;0;4;$duration");
-	                	$mssock->close();
-				Time::HiRes::sleep(0.5);
-				if ($Debug > 1) {print "Impuls senden\n";}
-				$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMImp/Pulse");
-				if ($Debug > 1) {print "Impuls gesendet\n";}
-			}
-	                undef($mssock);
-	        }
-	 	Time::HiRes::sleep(0.5); #.1 seconds
+			senddata("$datum;callmonitor;$ConnID;0;0;0;0;4;$duration","","",$ConnID);
+		}
+		Time::HiRes::sleep(0.5); #.1 seconds
 	}
 	if (!$sock) {
 		Time::HiRes::sleep(30);
@@ -181,11 +157,7 @@ undef($Caller);
 undef($Recipient);
 undef($extension);undef($duration);
 undef($Line);
-undef($MSPort);
-undef($MiniServer);
 undef($FRITZBOX);
-undef($MSPass);
-undef($MSUser);
 undef($cfg);
 undef($pcfg);
 undef($home);

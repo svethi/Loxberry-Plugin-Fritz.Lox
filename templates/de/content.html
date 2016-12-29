@@ -1,5 +1,12 @@
 <script>
-function setDepth(selobject)
+window.onload = atthebeginning();
+function atthebeginning() {
+	selMS(document.getElementById("miniserver"));
+	document.getElementById("do").disabled = true;
+	//enablesubmit();
+}
+
+function selMS(selobject)
 {
     if (window.XMLHttpRequest)
     {
@@ -15,15 +22,22 @@ function setDepth(selobject)
     {
         if (xmlhttp.readyState==4 && xmlhttp.status==200)
         {
-            // document.getElementById("labeldepth").innerHTML="Depth (gespeichert):";
-        } else {
-        	  document.getElementById("labeldepth").innerHTML="Depth <span style=\"color: #ff0000;\":";
+        	var MS = eval('('+xmlhttp.responseText+')');
+          document.getElementById("msudpport").value=MS.UDPPort;
+          $('#msenabled').val(MS.SendData).flipswitch('refresh');
+          $("#do").prop('disabled', true);
+          $("#do").button('refresh');
         }
     }
-    document.getElementById("labeldepth").innerHTML="Depth:";
-    newdepth = selobject.options[selobject.selectedIndex].value;
-    xmlhttp.open("GET","/admin/plugins/<!--$psubfolder-->/setDepth.cgi?depth=" + newdepth,true);
+    document.getElementById("msudpport").value="";
+    selectedMS = selobject.options[selobject.selectedIndex].value;
+    xmlhttp.open("GET","/admin/plugins/<!--$psubfolder-->/selMS.cgi?MS="+selectedMS,true);
     xmlhttp.send();
+}
+function enablesubmit()
+{
+	$("#do").removeAttr('disabled');
+	$("#do").button('refresh');
 }
 </script>
 
@@ -38,7 +52,7 @@ function setDepth(selobject)
 												<table class="formtable" border="0" width="100%">
 													<tr>
 														<td width="25%">
-															<label id="labeldepth">Fritzbox-IP:</label>
+															<label id="labelfbip">Fritzbox-IP:</label>
 														</td>
 														<td width="50%">
 															<input id="fritzboxip" name="fritzboxip" type="text" class="textfield"
@@ -50,11 +64,40 @@ function setDepth(selobject)
 													</tr>
 													<tr>
 														<td width="25%">
-															<label id="labeldepth">MiniServer UDP-Port:</label>
+															<label id="labelms">MiniServer:</label>
 														</td>
 														<td width="50%">
-															<input id="msudpport" name="msudpport" type="text" class="textfield"
-																value="<!--$MSUDPPort-->" data-validation-error-msg="* Bitte den MiniServer UDP-Port angeben">
+															<select id="miniserver" name="miniserver" data-mini="true" onchange="selMS(this);">
+<!--$MSselectlist-->
+															</select>
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelmsudpport">MiniServer UDP-Port:</label>
+														</td>
+														<td width="50%">
+															<input id="msudpport" name="msudpport" type="text" onchange="enablesubmit();" class="textfield"
+																value="" data-validation-error-msg="* Bitte den MiniServer UDP-Port angeben">
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelmsenabled">Daten an diesen MS senden:</label>
+														</td>
+														<td width="50%">
+														<fieldset onclick="enablesubmit()">
+																<select id="msenabled" name="msenabled" data-role="flipswitch">
+																	<option value="0">Aus</option>
+																	<option value="1">An</option>
+																</select>
+															</fieldset>
 														</td>
 														<td width="25%">
 															&nbsp;

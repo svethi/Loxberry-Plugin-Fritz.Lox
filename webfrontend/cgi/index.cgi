@@ -39,6 +39,8 @@ our $cache;
 our $FritzboxIP;
 our $MSUDPPort;
 our $savedata;
+our $MSselectlist;
+our $MiniServer;
 
 # Read Settings
 $cfg             = new Config::Simple("$home/config/system/general.cfg");
@@ -47,9 +49,8 @@ $lang            = $cfg->param("BASE.LANG");
 $curl            = $cfg->param("BINARIES.CURL");
 
 print "Content-Type: text/html\n\n";
-
 # Everything from URL
-foreach (split(/&/,$ENV{'QUERY_STRING'}))
+foreach (split(/&/,$ENV{"QUERY_STRING"}))
 {
   ($namef,$value) = split(/=/,$_,2);
   $namef =~ tr/+/ /;
@@ -64,6 +65,7 @@ foreach (split(/&/,$ENV{'QUERY_STRING'}))
 	if ( !$query{'savedata'} )     { if ( param('savedata')     ) { $savedata     = quotemeta(param('savedata'));     } else { $savedata     = $savedata;} } else { $savedata     = quotemeta($query{'savedata'});         }
 	if ( !$query{'do'} )           { if ( param('do')           ) { $do           = quotemeta(param('do'));           } else { $do           = "form"; } } else { $do           = quotemeta($query{'do'});           }
   if ( !$query{'cache'} )        { if ( param('cache')        ) { $cache        = param('cache');                   } else { $cache        = "";     } } else { $cache        = $query{'cache'};                   }
+  if ( !$query{'miniserver'} )   { if ( param('miniserver')   ) { $MiniServer = param('miniserver');  } else { $MiniServer   = "1";        } } else { $MiniServer = $query{'miniserver'};              }
 
 # Figure out in which subfolder we are installed
 
@@ -73,7 +75,15 @@ $psubfolder =~ s/(.*)\/(.*)\/(.*)$/$2/g;
 # read fritzlox configs
 $conf = new Config::Simple("$home/config/plugins/$psubfolder/fritzlox.conf");
 $FritzboxIP = $conf->param('general.FritzboxIP');
-$MSUDPPort = $conf->param('general.MSUDPPort');
+$MSUDPPort = "7000";
+
+for (my $i = 1; $i <= $cfg->param('BASE.MINISERVERS');$i++) {
+	if ($i == $MiniServer) {
+		$MSselectlist .= '																<option selected value="'.$i.'">'.$cfg->param("MINISERVER$i.NAME")."</option>\n";
+	} else {
+		$MSselectlist .= '																<option value="'.$i.'">'.$cfg->param("MINISERVER$i.NAME")."</option>\n";
+	}
+}
 
 if ( $FritzboxIP eq "" ) {
 	my $gw = `netstat -nr`;
@@ -115,7 +125,8 @@ if ($savedata == 1) {
   if ( !$query{'fritzboxip'} )   { if ( param('fritzboxip')   ) { $FritzboxIP = param('fritzboxip');  } else { $FritzboxIP   = $FritzboxIP;} } else { $FritzboxIP = quotemeta($query{'fritzboxip'});   }
   if ( !$query{'msudpport'} )    { if ( param('msudpport')    ) { $MSUDPPort  = param('msudpport');   } else { $MSUDPPort    = "7000";     } } else { $MSUDPPort  = $query{'msudpport'};               }
 	$conf->param('general.FritzboxIP',"$FritzboxIP");
-	$conf->param('general.MSUDPPort',"$MSUDPPort");
+	$conf->param("MINISERVER$MiniServer.UDPPort","$MSUDPPort");
+	$conf->param("MINISERVER$MiniServer.SendData",param('msenabled'));
 	$conf->save();
 }
 
