@@ -37,10 +37,16 @@ our $languagefile;
 our $languagefileplugin;
 our $cache;
 our $FritzboxIP;
+our $FBLogin;
+our $FBPass;
+our $FBusePb;
+our $FBusePbno;
+our $FBusePbyes;
 our $MSUDPPort;
 our $savedata;
 our $MSselectlist;
 our $MiniServer;
+our $restartMsg;
 
 # Read Settings
 $cfg             = new Config::Simple("$home/config/system/general.cfg");
@@ -65,8 +71,7 @@ foreach (split(/&/,$ENV{"QUERY_STRING"}))
 	if ( !$query{'savedata'} )     { if ( param('savedata')     ) { $savedata     = quotemeta(param('savedata'));     } else { $savedata     = $savedata;} } else { $savedata     = quotemeta($query{'savedata'});         }
 	if ( !$query{'do'} )           { if ( param('do')           ) { $do           = quotemeta(param('do'));           } else { $do           = "form"; } } else { $do           = quotemeta($query{'do'});           }
   if ( !$query{'cache'} )        { if ( param('cache')        ) { $cache        = param('cache');                   } else { $cache        = "";     } } else { $cache        = $query{'cache'};                   }
-  if ( !$query{'miniserver'} )   { if ( param('miniserver')   ) { $MiniServer = param('miniserver');  } else { $MiniServer   = "1";        } } else { $MiniServer = $query{'miniserver'};              }
-
+  if ( !$query{'miniserver'} )   { if ( param('miniserver')   ) { $MiniServer   = param('miniserver');              } else { $MiniServer   = "1";        } } else { $MiniServer = $query{'miniserver'};              }
 # Figure out in which subfolder we are installed
 
 $psubfolder = abs_path($0);
@@ -75,6 +80,9 @@ $psubfolder =~ s/(.*)\/(.*)\/(.*)$/$2/g;
 # read fritzlox configs
 $conf = new Config::Simple("$home/config/plugins/$psubfolder/fritzlox.conf");
 $FritzboxIP = $conf->param('general.FritzboxIP');
+$FBLogin = $conf->param('general.FBLogin');
+$FBPass = $conf->param('general.FBPass');
+$FBusePb = $conf->param('general.FBusePhonebook');
 $MSUDPPort = "7000";
 
 for (my $i = 1; $i <= $cfg->param('BASE.MINISERVERS');$i++) {
@@ -122,14 +130,33 @@ $savedata = substr($savedata,0,1);
 
 #save data?
 if ($savedata == 1) {
-  if ( !$query{'fritzboxip'} )   { if ( param('fritzboxip')   ) { $FritzboxIP = param('fritzboxip');  } else { $FritzboxIP   = $FritzboxIP;} } else { $FritzboxIP = quotemeta($query{'fritzboxip'});   }
-  if ( !$query{'msudpport'} )    { if ( param('msudpport')    ) { $MSUDPPort  = param('msudpport');   } else { $MSUDPPort    = "7000";     } } else { $MSUDPPort  = $query{'msudpport'};               }
+  if ( !$query{'fritzboxip'} )   { if ( param('fritzboxip')   ) { $FritzboxIP   = param('fritzboxip');              } else { $FritzboxIP   = $FritzboxIP;} } else { $FritzboxIP = quotemeta($query{'fritzboxip'});   }
+  if ( !$query{'msudpport'} )    { if ( param('msudpport')    ) { $MSUDPPort    = param('msudpport');               } else { $MSUDPPort    = "7000";     } } else { $MSUDPPort  = $query{'msudpport'};               }
+  if ( !$query{'fblogin'} )      { if ( param('fblogin')      ) { $FBLogin      = param('fblogin');                 } else { $FBLogin      = "";         } } else { $FBLogin  = $query{'fblogin'}; }
+  if ( !$query{'fbpass'} )       { if ( param('fbpass')       ) { $FBPass       = param('fbpass');                  } else { $FBPass       = "";         } } else { $FBPass  = $query{'fbpass'};  }
+  if ( !$query{'fbusepb'} )      { if ( param('fbusepb')      ) { $FBusePb      = param('fbusepb');                 } else { $FBusePb      = "0";        } } else { $FBusePb  = $query{'fbusepb'};  }
 	$conf->param('general.FritzboxIP',"$FritzboxIP");
+	$conf->param('general.FBLogin',"$FBLogin");
+	$conf->param('general.FBPass',"$FBPass");
+	$conf->param('general.FBusePhonebook',"$FBusePb");
 	$conf->param("MINISERVER$MiniServer.UDPPort","$MSUDPPort");
 	$conf->param("MINISERVER$MiniServer.SendData",param('msenabled'));
 	$conf->save();
+	$restartMsg = '													<table><tr>
+														<td width="25%">&nbsp</td>
+														<td width="50%">
+															<span style="color: red;">Die Einstellungen wurden geändert. Um diese zu übernehmen, muss der Loxberry neugestartet werden.</span>
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr></table>'."\n";
 }
-
+if ($FBusePb==1) {
+	$FBusePbyes='selected="selected"';
+} else {
+	$FBusePbno='selected="selected"';
+}
 # Title
 $template_title = $phrase->param("TXT0000") . ": Fritz.Lox";
 

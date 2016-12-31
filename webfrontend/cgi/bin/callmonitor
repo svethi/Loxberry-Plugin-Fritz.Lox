@@ -11,11 +11,14 @@ use Time::HiRes;
 use MIME::Base64;
 use strict;
  
-our $psubfolder = "REPLACEFOLDERNAME";   #"fritzlox";
-my $home = "REPLACEINSTALLFOLDER";  #"/opt/loxberry";				
+our $psubfolder = "fritzlox";
+my $home = "/opt/loxberry";				
 my $cfg = new Config::Simple("$home/config/system/general.cfg");
 my $pcfg = new Config::Simple("$home/config/plugins/$psubfolder/fritzlox.conf");
 my $FRITZBOX=$pcfg->param("general.FritzboxIP");
+my $FBLogin=$pcfg->param("general.FBLogin");
+my $FBPass=$pcfg->param("general.FBPass");
+my $FBusePhonebook=$pcfg->param("general.FBusePhonebook");
 my $datum;
 my $Command;
 my $ConnID;
@@ -26,6 +29,7 @@ my $extension;
 my $duration;
 my $Debug;
 my $count;
+my $Name;
 
 my $ua = LWP::UserAgent->new;
 
@@ -100,6 +104,9 @@ if ( $FRITZBOX eq "" ) {
 	$FRITZBOX = $1;
 }
 
+if ( $FBLogin eq "" ) { $FBLogin = "1"; }
+if ( $FBPass eq "" ) { $FBPass = "1"; }
+
 do {
 
 	if (!$sock) {
@@ -118,11 +125,33 @@ do {
 		if ($_ =~ /RING/){
 			($datum,$Command,$ConnID,$Caller,$Recipient,$Line) = split(";", $_);
 			if ($Debug != 0 ) {print "Eingehender Anruf auf Leitung $ConnID.\n";}
-			senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Recipient,$ConnID);
+			if ($FBusePhonebook) {
+				if ($Debug != 0) {print "Anrufer auf Leitung $ConnID ermitteln.\n";}
+				$Name = qx(./FBPBgetName $Caller $FBLogin $FBPass $FRITZBOX);
+				if (length($Name) > 0) {
+					if ($Debug != 0) {print "$Name auf Leitung $ConnID.\n";}
+					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Name,$Recipient,$ConnID);
+				} else {
+					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Recipient,$ConnID);
+				}
+			} else {
+				senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Recipient,$ConnID);
+			}
 		} elsif ($_ =~ /CALL/){
 			($datum,$Command,$ConnID,$extension,$Caller,$Recipient,$Line) = split(";", $_);
 			if ($Debug !=0 ) {print "Ausgehender Anruf auf Leitung $ConnID.\n";}
-			senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;$extension;3;0",$Caller,$Recipient,$ConnID);
+			if ($FBusePhonebook) {
+				if ($Debug != 0) {print "Angerufener auf Leitung $ConnID ermitteln.\n";}
+				$Name = qx(./FBPBgetName $Recipient $FBLogin $FBPass $FRITZBOX);
+				if (length($Name) > 0) {
+					if ($Debug != 0) {print "$Name auf Leitung $ConnID.\n";}
+					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Name,$ConnID);
+				} else {
+					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Recipient,$ConnID);
+				}
+			} else {
+				senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Recipient,$ConnID);
+			}
 		} elsif ($_ =~ /;CONNECT/){
 			($datum,$Command,$ConnID,$extension,$Caller) = split(";", $_);
 			if ($Debug != 0 ) {print "Verbindung auf Leitung $ConnID verbunden.\n";}

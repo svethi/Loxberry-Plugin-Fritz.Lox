@@ -4,6 +4,7 @@ function atthebeginning() {
 	selMS(document.getElementById("miniserver"));
 	document.getElementById("do").disabled = true;
 	//enablesubmit();
+	checkFB(true);
 }
 
 function selMS(selobject)
@@ -39,6 +40,38 @@ function enablesubmit()
 	$("#do").removeAttr('disabled');
 	$("#do").button('refresh');
 }
+
+function checkFB(start)
+{
+    if (window.XMLHttpRequest)
+    {
+        // AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
+        xmlcheck=new XMLHttpRequest();
+    }
+    else
+    {
+        // AJAX mit IE6, IE5
+        xmlcheck=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    xmlcheck.onreadystatechange=function()
+    {
+        if (xmlcheck.readyState==4 && xmlcheck.status==200)
+        {
+        	var FB = eval('('+xmlcheck.responseText+')');
+        	if (FB.check ==1) {
+        		$('#fbusepb').flipswitch('enable');
+        	} else {
+        		if (start == false) $('#fbusepb').val(0).flipswitch('refresh');
+        		$('#fbusepb').flipswitch('disable');
+        	}
+        }
+    }
+    var FBIP = document.getElementById("fritzboxip").value;
+    var FBLogin = document.getElementById("fblogin").value;
+    var FBPass = document.getElementById("fbpass").value;
+    xmlcheck.open("GET","/admin/plugins/<!--$psubfolder-->/checkFB.php?fbIP="+FBIP+"&fbLogin="+FBLogin+"&fbPass="+FBPass,true);
+    xmlcheck.send();
+}
 </script>
 
 <div role=\"main\" class=\"ui-content\">
@@ -55,8 +88,48 @@ function enablesubmit()
 															<label id="labelfbip">Fritzbox-IP:</label>
 														</td>
 														<td width="50%">
-															<input id="fritzboxip" name="fritzboxip" type="text" class="textfield"
+															<input id="fritzboxip" name="fritzboxip" type="text" class="textfield" oninput="enablesubmit();" onchange="checkFB(false);"
 																value="<!--$FritzboxIP-->" data-validation-error-msg="* Bitte die Fritzbox IP-Adresse angeben">
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelfblogin">Fritzbox-Login:</label>
+														</td>
+														<td width="50%">
+															<input id="fblogin" name="fblogin" type="text" class="textfield" oninput="enablesubmit();" onchange="checkFB(false);"
+																value="<!--$FBLogin-->" data-validation-error-msg="* Bitte den Fritzbox Loginnamen angeben">
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelfbpass">Fritzbox-Passwort:</label>
+														</td>
+														<td width="50%">
+															<input id="fbpass" name="fbpass" type="text" class="textfield" oninput="enablesubmit();" onchange="checkFB(false);"
+																value="<!--$FBPass-->" data-validation-error-msg="* Bitte das Fritzbox Passwort angeben">
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelfbusepb">FB Telefonbuch verwenden:</label>
+														</td>
+														<td width="50%">
+														<fieldset onclick="enablesubmit();">
+																<select id="fbusepb" name="fbusepb" data-role="flipswitch">
+																	<option <!--$FBusePbno--> value="0">Nein</option>
+																	<option <!--$FBusePbyes--> value="1">Ja</option>
+																</select>
+															</fieldset>
 														</td>
 														<td width="25%">
 															&nbsp;
@@ -80,7 +153,7 @@ function enablesubmit()
 															<label id="labelmsudpport">MiniServer UDP-Port:</label>
 														</td>
 														<td width="50%">
-															<input id="msudpport" name="msudpport" type="text" onchange="enablesubmit();" class="textfield"
+															<input id="msudpport" name="msudpport" type="text" oninput="enablesubmit();" class="textfield"
 																value="" data-validation-error-msg="* Bitte den MiniServer UDP-Port angeben">
 														</td>
 														<td width="25%">
@@ -94,8 +167,8 @@ function enablesubmit()
 														<td width="50%">
 														<fieldset onclick="enablesubmit()">
 																<select id="msenabled" name="msenabled" data-role="flipswitch">
-																	<option value="0">Aus</option>
-																	<option value="1">An</option>
+																	<option value="0">Nein</option>
+																	<option value="1">Ja</option>
 																</select>
 															</fieldset>
 														</td>
@@ -115,6 +188,7 @@ function enablesubmit()
 											</table>
 										</div>
 									</form>
+<!--$restartMsg-->
 <h2>Einrichtungshilfe</h2>
 									<form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
 										<input type="hidden" id="lang" name="lang" value="<!--$lang-->">
