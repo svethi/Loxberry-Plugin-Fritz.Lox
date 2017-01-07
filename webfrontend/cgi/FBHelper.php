@@ -1,5 +1,6 @@
 <?php
 
+//git - test
 
 $home = posix_getpwuid(posix_getuid());
 $home = $home['dir'];
