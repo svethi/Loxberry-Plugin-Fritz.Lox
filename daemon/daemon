@@ -19,8 +19,8 @@
 case "$1" in
         'start')
                 log_daemon_msg "Starting callmonitor service" "callmonitor"
-                cd /opt/loxberry/webfrontend/cgi/plugins/fritzlox/bin
-                ./callmonitor >> /opt/loxberry/log/plugins/fritzlox/callmonitor.log &
+                cd REPLACEINSTALLFOLDER/webfrontend/cgi/plugins/REPLACEFOLDERNAME/bin
+                ./callmonitor >> REPLACEINSTALLFOLDER/log/plugins/REPLACEFOLDERNAME/callmonitor.log &
                 log_end_msg 0 ;;
         'stop')
                 log_daemon_msg "Stopping callmonitor service" "callmonitor"
@@ -29,15 +29,15 @@ case "$1" in
         'restart')
                 log_daemon_msg "Restarting callmonitor service" "callmonitor"
                 /usr/bin/killall callmonitor &
-                cd /opt/loxberry/webfrontend/cgi/plugins/fritzlox/bin
-                ./callmonitor >> /opt/loxberry/log/plugins/fritzlox/callmonitor.log &
+                cd REPLACEINSTALLFOLDER/webfrontend/cgi/plugins/REPLACEFOLDERNAME/bin
+                ./callmonitor >> REPLACEINSTALLFOLDER/log/plugins/REPLACEFOLDERNAME/callmonitor.log &
                 log_end_msg 0;;
         '')
                 if [ -h /etc/init.d/callmonitor ]
                 then
                   /usr/sbin/service callmonitor start
                 else
-                  ln -s /opt/loxberry/system/daemons/plugins/fritzlox /etc/init.d/callmonitor
+                  ln -s REPLACEINSTALLFOLDER/system/daemons/plugins/REPLACEFOLDERNAME /etc/init.d/callmonitor
                   /bin/systemctl daemon-reload
                   /etc/init.d/callmonitor start
                 fi;;

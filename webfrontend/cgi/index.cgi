@@ -23,6 +23,7 @@ my  $cfg;
 my  $conf;
 our $curl;
 our $psubfolder;
+our $localip;
 our $dotest;
 our $helptext;
 our $helplink;
@@ -118,7 +119,7 @@ my $sock = IO::Socket::INET->new(
                        PeerAddr=> "example.com",
                        PeerPort=> 80,
                        Proto   => "tcp");
-my $localip = $sock->sockhost;
+$localip = $sock->sockhost;
 
 my $gw = `netstat -nr`;
 $gw =~ m/0.0.0.0\s+([0-9]+.[0-9]+.[0-9]+.[0-9]+)/g;

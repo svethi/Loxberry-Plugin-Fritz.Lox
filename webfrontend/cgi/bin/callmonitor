@@ -11,8 +11,8 @@ use Time::HiRes;
 use MIME::Base64;
 use strict;
  
-our $psubfolder = "fritzlox";
-my $home = "/opt/loxberry";				
+our $psubfolder = "REPLACEFOLDERNAME"; #"fritzlox";
+my $home = "REPLACEINSTALLFOLDER"; #"/opt/loxberry";		
 my $cfg = new Config::Simple("$home/config/system/general.cfg");
 my $pcfg = new Config::Simple("$home/config/plugins/$psubfolder/fritzlox.conf");
 my $FRITZBOX=$pcfg->param("general.FritzboxIP");
@@ -71,12 +71,12 @@ sub senddata {
 				Type => SOCK_DGRAM
 				);
 				if ($mssock) {
-				  if (length($Caller)) {
+					if ($txCaller ne "-") {
 						if ($Debug != 0) {print "Caller ($txCaller) auf Leitung $ConnID an $MSName senden.\n";}
 						$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMCaller$ConnID/$txCaller");
 						if ($Debug > 1) {printf "%s\n", $req->content;}
 					}
-					if (length($txRecipient)) {
+					if ($txRecipient ne "-") {
 						if ($Debug !=0) {print "Recipient ($txRecipient) auf Leitung $ConnID an $MSName senden.\n";}
 						$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMRec$ConnID/$txRecipient");
 						if ($Debug > 1) {printf "%s\n", $req->content;}
@@ -124,6 +124,8 @@ do {
 		if ($Debug > 1) {printf "%s",$_;}
 		if ($_ =~ /RING/){
 			($datum,$Command,$ConnID,$Caller,$Recipient,$Line) = split(";", $_);
+			$Recipient =~ s/#//g;
+			$Caller =~ s/#//g;
 			if ($Debug != 0 ) {print "Eingehender Anruf auf Leitung $ConnID.\n";}
 			if ($FBusePhonebook) {
 				if ($Debug != 0) {print "Anrufer auf Leitung $ConnID ermitteln.\n";}
@@ -139,27 +141,30 @@ do {
 			}
 		} elsif ($_ =~ /CALL/){
 			($datum,$Command,$ConnID,$extension,$Caller,$Recipient,$Line) = split(";", $_);
+			$Recipient =~ s/#//g;
+			$Caller =~ s/#//g;
 			if ($Debug !=0 ) {print "Ausgehender Anruf auf Leitung $ConnID.\n";}
 			if ($FBusePhonebook) {
 				if ($Debug != 0) {print "Angerufener auf Leitung $ConnID ermitteln.\n";}
 				$Name = qx(./FBPBgetName $Recipient $FBLogin $FBPass $FRITZBOX);
 				if (length($Name) > 0) {
 					if ($Debug != 0) {print "$Name auf Leitung $ConnID.\n";}
-					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Name,$ConnID);
+					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;$extension;3;0",$Caller,$Name,$ConnID);
 				} else {
-					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Recipient,$ConnID);
+					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;$extension;3;0",$Caller,$Recipient,$ConnID);
 				}
 			} else {
-				senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Recipient,$ConnID);
+				senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;$extension;3;0",$Caller,$Recipient,$ConnID);
 			}
 		} elsif ($_ =~ /;CONNECT/){
 			($datum,$Command,$ConnID,$extension,$Caller) = split(";", $_);
+			$Caller =~ s/#//g;
 			if ($Debug != 0 ) {print "Verbindung auf Leitung $ConnID verbunden.\n";}
-			senddata("$datum;callmonitor;$ConnID;$Caller;0;0;$extension;2;0",$Caller,"",$ConnID);
+			senddata("$datum;callmonitor;$ConnID;$Caller;0;0;$extension;2;0","-","-",$ConnID);
 		} elsif ($_ =~ /DISCONNECT/){
 			($datum,$Command,$ConnID,$duration) = split(";", $_);
 			if ($Debug != 0 ) {print "Verbindung auf Leitung $ConnID beendet.\n";}
-			senddata("$datum;callmonitor;$ConnID;0;0;0;0;4;$duration","","",$ConnID);
+			senddata("$datum;callmonitor;$ConnID;0;0;0;0;4;$duration","-","-",$ConnID);
 		}
 		Time::HiRes::sleep(0.5); #.1 seconds
 	}

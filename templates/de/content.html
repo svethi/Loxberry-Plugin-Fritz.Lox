@@ -190,13 +190,55 @@ function checkFB(start)
 									</form>
 <!--$restartMsg-->
 <h2>Einrichtungshilfe</h2>
-									<form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
-										<input type="hidden" id="lang" name="lang" value="<!--$lang-->">
-											<div class="form-group">
-												<table class="formtable" border="0" width="100%">
-											</table>
-										</div>
-									</form>
+<h3>WLAN aktivieren/deaktivieren</h3>
+<table border=0>
+	<tr>
+		<td colspan=2>
+			<b>virtueller Ausgang in der Config</b>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			Adresse:
+		</td>
+		<td>
+			http://<!--$localip-->
+		</td>
+	</tr>
+	<tr><td colspan=2>&nbsp;</td></tr>
+	<tr>
+		<td colspan=2>
+			<b>virtueller Ausgang Befehl</b>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			Befehle bei Ein:
+		</td>
+		<td>
+		/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=enableWLAN&WLAN=
+		</td>
+	</tr>
+	<tr>
+		<td>
+		Befehle bei Aus:
+		</td>
+		<td>
+			/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=disableWLAN&WLAN=
+		</td>
+	</tr>
+	<tr><td colspan=2>&nbsp;</td></tr>
+	<tr>
+		<td colspan=2>
+			Am Ende des kommt noch die Nummer des WLAN ran. Mögliche Werte sind:
+			<ul>
+				<li>WLAN=1 : Das 2,4GHz StandardWLAN.</li>
+				<li>WLAN=2 : Das 5GHz WLAN wenn vorhanden, ansonsten das GästeWLAN.</li>
+				<li>WLAN=3 : Das Gäste WLAN wenn das 5GHz WLAN vorhanden ist.</li>
+			</ul>
+		</td>
+	</tr>
+</table>
 <script>
 		var $messages = $('#form-error-message');
 		$.validate({

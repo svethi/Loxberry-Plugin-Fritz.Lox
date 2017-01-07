@@ -1,0 +1,38 @@
+#!/usr/bin/php
+<?php
+
+$number = $argv[1];
+$login = $argv[2];
+$pass = $argv[3];
+$IP = $argv[4];
+
+$found = 0;
+$client = new SoapClient(
+    null,
+    array(
+			'location'   => "http://".$IP.":49000/upnp/control/x_contact",
+			'uri'        => "urn:dslforum-org:service:X_AVM-DE_OnTel:1",
+			'noroot'     => True,
+			'login'      => $login,
+			'password'   => $pass
+    )
+);
+$result = $client->GetPhonebook(new SoapParam(0,"NewPhonebookID"));
+$xml = @simplexml_load_file($result['NewPhonebookURL']);
+
+$number +=0;
+$test = "/".$number."$/";
+foreach($xml->phonebook->children() as $child) {
+  if (strcmp($child->getName(),"contact")==0) {
+	$numbers = $child->telephony->number;
+	for ($i = 0; $i < count($numbers); $i++) {
+		if (preg_match($test,$numbers[$i])) {
+			echo $child->person->realName;
+			$found = 1;
+			exit;
+		}
+	}
+	if ($found > 0) exit;
+  }
+}
+?>
