@@ -21,6 +21,7 @@ $FBPass = $fritzloxconf['general']['FBPass'];
 
 $WLAN = (isset($_GET['WLAN'])) ? $_GET['WLAN'] : "";
 $cmd = (isset($_GET['cmd'])) ? $_GET['cmd'] : "";
+$FBDECTAIN = (isset($_GET['DECTAIN'])) ? $_GET['DECTAIN'] : "";
 
 if (strlen($cmd) > 0) {
 	switch ($cmd) {
@@ -67,6 +68,99 @@ if (strlen($cmd) > 0) {
 				print $fault->faultstring;
 			}
 		}
+		break;
+	case "DECTswitchOFF":
+		if (strlen($FBDECTAIN) > 0) {
+			$client = new SoapClient(
+				null,
+				array(
+					'location' => "http://".$FBIP.":49000/upnp/control/x_homeauto",
+					'uri'      => "urn:dslforum-org:service:X_AVM-DE_Homeauto:1",
+					'noroot'   => True,
+					'login'    => $FBLogin,
+					'password' => $FBPass
+				)
+			);
+			try {
+				$client->SetSwitch(new SoapParam("$FBDECTAIN",'NewAIN'),new SoapParam(OFF,'NewSwitchState'));
+				print "OK";
+			} catch (SoapFault $fault) {
+				print $fault->faultstring;
+			}
+		}
+		break;
+	case "DECTswitchON":
+		if (strlen($FBDECTAIN) > 0) {
+			$client = new SoapClient(
+				null,
+				array(
+					'location' => "http://".$FBIP.":49000/upnp/control/x_homeauto",
+					'uri'      => "urn:dslforum-org:service:X_AVM-DE_Homeauto:1",
+					'noroot'   => True,
+					'login'    => $FBLogin,
+					'password' => $FBPass
+				)
+			);
+			try {
+				$client->SetSwitch(new SoapParam("$FBDECTAIN",'NewAIN'),new SoapParam(ON,'NewSwitchState'));
+				print "OK";
+			} catch (SoapFault $fault) {
+				print $fault->faultstring;
+			}
+		}
+		break;
+	case "DECTgetInfo":
+		if (strlen($FBDECTAIN) > 0) {
+			$client = new SoapClient(
+				null,
+				array(
+					'location' => "http://".$FBIP.":49000/upnp/control/x_homeauto",
+					'uri'      => "urn:dslforum-org:service:X_AVM-DE_Homeauto:1",
+					'noroot'   => True,
+					'login'    => $FBLogin,
+					'password' => $FBPass
+				)
+			);
+			try {
+				$res = $client->GetSpecificDeviceInfos(new SoapParam($FBDECTAIN,'NewAIN'));
+				print_r($res);
+			} catch (SoapFault $fault) {
+				//print_r($fault);
+			print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+			}
+		}
+		break;
+	case "DECTgetSwitchList":
+		$client = new SoapClient(
+			null,
+			array(
+				'location' => "http://".$FBIP.":49000/upnp/control/x_homeauto",
+				'uri'      => "urn:dslforum-org:service:X_AVM-DE_Homeauto:1",
+				'noroot'   => True,
+				'login'    => $FBLogin,
+				'password' => $FBPass
+			)
+		);
+		print "{\n\t".'"Switches":'."\n\t[";
+		for ($i = 0; $i < 1000; $i++) {
+			try {
+				//$res = $client->GetSpecificDeviceInfos(new SoapParam($FBDECTAIN,'NewAIN'));
+				$res = $client->GetGenericDeviceInfos(new SoapParam($i,'NewIndex'));
+				if ($res['NewSwitchIsEnabled'] == "ENABLED") {
+					if ($i>0) print ",\n";
+					print "\n\t\t{\n\t\t\t".'"name":"'.$res['NewDeviceName'].'",';
+					print "\n\t\t\t".'"AIN":"'.str_replace(" ","+",$res['NewAIN']).'"'."\n\t\t}";
+				}
+			} catch (SoapFault $fault) {
+				//print_r($fault);
+				if ($fault->detail->UPnPError->errorCode == 713) {
+					$i = 1000;
+				} else {
+					print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+				}
+			}
+		}
+		print "\n\t]\n}\n";
 		break;
 	}
 } else {

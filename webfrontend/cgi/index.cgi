@@ -12,6 +12,7 @@ use CGI qw/:standard/;
 use Config::Simple;
 use Cwd 'abs_path';
 use IO::Socket::INET;
+use JSON qw( decode_json );
 use warnings;
 use strict;
 no strict "refs"; # we need it for template system
@@ -48,6 +49,7 @@ our $savedata;
 our $MSselectlist;
 our $MiniServer;
 our $restartMsg;
+our $DECTSwitchessellist;
 
 # Read Settings
 $cfg             = new Config::Simple("$home/config/system/general.cfg");
@@ -91,6 +93,18 @@ for (my $i = 1; $i <= $cfg->param('BASE.MINISERVERS');$i++) {
 		$MSselectlist .= '																<option selected value="'.$i.'">'.$cfg->param("MINISERVER$i.NAME")."</option>\n";
 	} else {
 		$MSselectlist .= '																<option value="'.$i.'">'.$cfg->param("MINISERVER$i.NAME")."</option>\n";
+	}
+}
+
+my $json = `curl -s "http://svethi:JackPoint1\@localhost/admin/plugins/fritzlox/FBHelper.php?cmd=DECTgetSwitchList"`;
+my $decoded = decode_json($json);
+my @Switches = @{$decoded->{'Switches'}};
+my $i;
+foreach (@Switches) {
+	if ($i == 0) {
+		$DECTSwitchessellist .= '																<option selected value="'.$_->{'AIN'}.'">'.$_->{'name'}."</option>\n";
+	} else {
+		$DECTSwitchessellist .= '																<option value="'.$_->{'AIN'}.'">'.$_->{'name'}."</option>\n";
 	}
 }
 
