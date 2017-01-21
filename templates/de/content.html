@@ -9,13 +9,15 @@ function atthebeginning() {
 }
 
 function setDECTSwitchCommands(selobject) {
-	selAIN=selobject.options[selobject.selectedIndex].value;
-	document.getElementById("DECTswON").innerHTML = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchON&DECTAIN=" + selAIN;
-	document.getElementById("DECTswON").href = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchON&DECTAIN=" + selAIN;
-	document.getElementById("DECTswOFF").innerHTML = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
-	document.getElementById("DECTswOFF").href = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
-	document.getElementById("DECTInfo").innerHTML = "http://<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
-	document.getElementById("DECTInfo").href = "http://<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
+	if ($("#DECTswList option").size() > 0) {
+		selAIN=selobject.options[selobject.selectedIndex].value;
+		document.getElementById("DECTswON").innerHTML = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchON&DECTAIN=" + selAIN;
+		document.getElementById("DECTswON").href = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchON&DECTAIN=" + selAIN;
+		document.getElementById("DECTswOFF").innerHTML = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
+		document.getElementById("DECTswOFF").href = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
+		document.getElementById("DECTInfo").innerHTML = "http://<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
+		document.getElementById("DECTInfo").href = "http://<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
+	}
 }
 
 function selMS(selobject)

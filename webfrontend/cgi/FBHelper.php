@@ -150,10 +150,15 @@ if (strlen($cmd) > 0) {
 				}
 			} catch (SoapFault $fault) {
 				//print_r($fault);
-				if ($fault->detail->UPnPError->errorCode == 713) {
-					$i = 1000;
+				$i = 1000;
+				if (isset($fault->detail)) {
+					if ($fault->detail->UPnPError->errorCode == 713) {
+						//keine weiteren Geräte
+					} else {
+						//print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+					}
 				} else {
-					print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+					//print_r($fault);
 				}
 			}
 		}
