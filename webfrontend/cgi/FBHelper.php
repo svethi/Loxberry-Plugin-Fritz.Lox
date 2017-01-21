@@ -1,7 +1,5 @@
 <?php
 
-//git - test
-
 $home = posix_getpwuid(posix_getuid());
 $home = $home['dir'];
 
@@ -9,8 +7,6 @@ $home = $home['dir'];
 
 $psubfolder = __FILE__;
 $psubfolder = preg_replace('/(.*)\/(.*)\/(.*)$/',"$2", $psubfolder);
-
-$myFile = "$home/data/plugins/$psubfolder/caldav_".MD5($calURL).".ical";
 
 //Get conffile
 $fritzloxconf = parse_ini_file("$home/config/plugins/$psubfolder/fritzlox.conf",True);
@@ -22,6 +18,7 @@ $FBPass = $fritzloxconf['general']['FBPass'];
 $WLAN = (isset($_GET['WLAN'])) ? $_GET['WLAN'] : "";
 $cmd = (isset($_GET['cmd'])) ? $_GET['cmd'] : "";
 $FBDECTAIN = (isset($_GET['DECTAIN'])) ? $_GET['DECTAIN'] : "";
+if (php_sapi_name() == 'cli') $cmd = "DECTgetSwitchList";
 
 if (strlen($cmd) > 0) {
 	switch ($cmd) {

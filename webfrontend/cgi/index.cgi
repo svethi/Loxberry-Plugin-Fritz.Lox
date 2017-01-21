@@ -96,7 +96,7 @@ for (my $i = 1; $i <= $cfg->param('BASE.MINISERVERS');$i++) {
 	}
 }
 
-my $json = `curl -s "http://svethi:JackPoint1\@localhost/admin/plugins/fritzlox/FBHelper.php?cmd=DECTgetSwitchList"`;
+my $json = `php -f ./FBHelper.php`;
 my $decoded = decode_json($json);
 my @Switches = @{$decoded->{'Switches'}};
 my $i;
