@@ -15,8 +15,8 @@ function setDECTSwitchCommands(selobject) {
 		document.getElementById("DECTswON").href = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchON&DECTAIN=" + selAIN;
 		document.getElementById("DECTswOFF").innerHTML = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
 		document.getElementById("DECTswOFF").href = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
-		document.getElementById("DECTInfo").innerHTML = "http://<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
-		document.getElementById("DECTInfo").href = "http://<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
+		document.getElementById("DECTInfo").innerHTML = "http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
+		document.getElementById("DECTInfo").href = "http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
 	}
 }
 
@@ -215,7 +215,7 @@ function checkFB(start)
 			Adresse:
 		</td>
 		<td>
-			http://<!--$localip-->
+			http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->
 		</td>
 	</tr>
 	<tr><td colspan=2>&nbsp;</td></tr>
@@ -280,7 +280,7 @@ function checkFB(start)
 					Adresse:
 				</td>
 				<td>
-					http://<!--$localip-->
+					http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->
 				</td>
 			</tr>
 			<tr><td colspan=2>&nbsp;</td></tr>

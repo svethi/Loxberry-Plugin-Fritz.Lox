@@ -50,6 +50,7 @@ our $MSselectlist;
 our $MiniServer;
 our $restartMsg;
 our $DECTSwitchessellist;
+our $lxbUser;
 
 # Read Settings
 $cfg             = new Config::Simple("$home/config/system/general.cfg");
@@ -87,6 +88,7 @@ $FBLogin = $conf->param('general.FBLogin');
 $FBPass = $conf->param('general.FBPass');
 $FBusePb = $conf->param('general.FBusePhonebook');
 $MSUDPPort = "7000";
+$lxbUser = $ENV{'REMOTE_USER'};
 
 for (my $i = 1; $i <= $cfg->param('BASE.MINISERVERS');$i++) {
 	if ($i == $MiniServer) {
