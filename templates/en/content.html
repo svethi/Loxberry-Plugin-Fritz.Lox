@@ -1,5 +1,26 @@
 <script>
-function setDepth(selobject)
+window.onload = atthebeginning();
+function atthebeginning() {
+	selMS(document.getElementById("miniserver"));
+	document.getElementById("do").disabled = true;
+	//enablesubmit();
+	checkFB(true);
+	setDECTSwitchCommands(document.getElementById("DECTswList"));
+}
+
+function setDECTSwitchCommands(selobject) {
+	if ($("#DECTswList option").size() > 0) {
+		selAIN=selobject.options[selobject.selectedIndex].value;
+		document.getElementById("DECTswON").innerHTML = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchON&DECTAIN=" + selAIN;
+		document.getElementById("DECTswON").href = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchON&DECTAIN=" + selAIN;
+		document.getElementById("DECTswOFF").innerHTML = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
+		document.getElementById("DECTswOFF").href = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
+		document.getElementById("DECTInfo").innerHTML = "http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
+		document.getElementById("DECTInfo").href = "http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
+	}
+}
+
+function selMS(selobject)
 {
     if (window.XMLHttpRequest)
     {
@@ -15,15 +36,54 @@ function setDepth(selobject)
     {
         if (xmlhttp.readyState==4 && xmlhttp.status==200)
         {
-            // document.getElementById("labeldepth").innerHTML="Depth (gespeichert):";
-        } else {
-        	  document.getElementById("labeldepth").innerHTML="Depth <span style=\"color: #ff0000;\":";
+        	var MS = eval('('+xmlhttp.responseText+')');
+          document.getElementById("msudpport").value=MS.UDPPort;
+          $('#msenabled').val(MS.SendData).flipswitch('refresh');
+          $("#do").prop('disabled', true);
+          $("#do").button('refresh');
         }
     }
-    document.getElementById("labeldepth").innerHTML="Depth:";
-    newdepth = selobject.options[selobject.selectedIndex].value;
-    xmlhttp.open("GET","/admin/plugins/<!--$psubfolder-->/setDepth.cgi?depth=" + newdepth,true);
+    document.getElementById("msudpport").value="";
+    selectedMS = selobject.options[selobject.selectedIndex].value;
+    xmlhttp.open("GET","/admin/plugins/<!--$psubfolder-->/selMS.cgi?MS="+selectedMS,true);
     xmlhttp.send();
+}
+function enablesubmit()
+{
+	$("#do").removeAttr('disabled');
+	$("#do").button('refresh');
+}
+
+function checkFB(start)
+{
+    if (window.XMLHttpRequest)
+    {
+        // AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
+        xmlcheck=new XMLHttpRequest();
+    }
+    else
+    {
+        // AJAX mit IE6, IE5
+        xmlcheck=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    xmlcheck.onreadystatechange=function()
+    {
+        if (xmlcheck.readyState==4 && xmlcheck.status==200)
+        {
+        	var FB = eval('('+xmlcheck.responseText+')');
+        	if (FB.check ==1) {
+        		$('#fbusepb').flipswitch('enable');
+        	} else {
+        		if (start == false) $('#fbusepb').val(0).flipswitch('refresh');
+        		$('#fbusepb').flipswitch('disable');
+        	}
+        }
+    }
+    var FBIP = document.getElementById("fritzboxip").value;
+    var FBLogin = document.getElementById("fblogin").value;
+    var FBPass = document.getElementById("fbpass").value;
+    xmlcheck.open("GET","/admin/plugins/<!--$psubfolder-->/checkFB.php?fbIP="+FBIP+"&fbLogin="+FBLogin+"&fbPass="+FBPass,true);
+    xmlcheck.send();
 }
 </script>
 
@@ -31,21 +91,232 @@ function setDepth(selobject)
 <div class=\"ui-body ui-body-a ui-corner-all loxberry-logo\">
 <div style=\"margin: 5%;\">
 
-<h2>Settings</h2>
+<h2>Einstellungen</h2>
 									<form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
+										<input type="hidden" name="savedata" id="savedata" value="1">
 											<div class="form-group">
 												<table class="formtable" border="0" width="100%">
+													<tr>
+														<td width="25%">
+															<label id="labelfbip">Fritzbox-IP:</label>
+														</td>
+														<td width="50%">
+															<input id="fritzboxip" name="fritzboxip" type="text" class="textfield" oninput="enablesubmit();" onchange="checkFB(false);"
+																value="<!--$FritzboxIP-->" data-validation-error-msg="* Bitte die Fritzbox IP-Adresse angeben">
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelfblogin">Fritzbox-Login:</label>
+														</td>
+														<td width="50%">
+															<input id="fblogin" name="fblogin" type="text" class="textfield" oninput="enablesubmit();" onchange="checkFB(false);"
+																value="<!--$FBLogin-->" data-validation-error-msg="* Bitte den Fritzbox Loginnamen angeben">
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelfbpass">Fritzbox-Passwort:</label>
+														</td>
+														<td width="50%">
+															<input id="fbpass" name="fbpass" type="text" class="textfield" oninput="enablesubmit();" onchange="checkFB(false);"
+																value="<!--$FBPass-->" data-validation-error-msg="* Bitte das Fritzbox Passwort angeben">
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelfbusepb">FB Telefonbuch verwenden:</label>
+														</td>
+														<td width="50%">
+														<fieldset onclick="enablesubmit();">
+																<select id="fbusepb" name="fbusepb" data-role="flipswitch">
+																	<option <!--$FBusePbno--> value="0">Nein</option>
+																	<option <!--$FBusePbyes--> value="1">Ja</option>
+																</select>
+															</fieldset>
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelms">MiniServer:</label>
+														</td>
+														<td width="50%">
+															<select id="miniserver" name="miniserver" data-mini="true" onchange="selMS(this);">
+<!--$MSselectlist-->
+															</select>
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelmsudpport">MiniServer UDP-Port:</label>
+														</td>
+														<td width="50%">
+															<input id="msudpport" name="msudpport" type="text" oninput="enablesubmit();" class="textfield"
+																value="" data-validation-error-msg="* Bitte den MiniServer UDP-Port angeben">
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelmsenabled">Daten an diesen MS senden:</label>
+														</td>
+														<td width="50%">
+														<fieldset onclick="enablesubmit()">
+																<select id="msenabled" name="msenabled" data-role="flipswitch">
+																	<option value="0">Nein</option>
+																	<option value="1">Ja</option>
+																</select>
+															</fieldset>
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">&nbsp</td>
+														<td width="50%">
+															<input id="do" name="do" type="submit" value="Angaben speichern">
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>		
 											</table>
 										</div>
 									</form>
-<h2>Configuration hints</h2>
-									<form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
-										<input type="hidden" id="lang" name="lang" value="<!--$lang-->">
-											<div class="form-group">
-												<table class="formtable" border="0" width="100%">
-											</table>
-										</div>
-									</form>
+<!--$restartMsg-->
+<h2>Einrichtungshilfe</h2>
+<h3>WLAN aktivieren/deaktivieren</h3>
+<table border=0>
+	<tr>
+		<td colspan=2>
+			<b>virtueller Ausgang in der Config</b>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			Adresse:
+		</td>
+		<td>
+			http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->
+		</td>
+	</tr>
+	<tr><td colspan=2>&nbsp;</td></tr>
+	<tr>
+		<td colspan=2>
+			<b>virtueller Ausgang Befehl</b>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			Befehle bei Ein:
+		</td>
+		<td>
+		/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=enableWLAN&WLAN=
+		</td>
+	</tr>
+	<tr>
+		<td>
+		Befehle bei Aus:
+		</td>
+		<td>
+			/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=disableWLAN&WLAN=
+		</td>
+	</tr>
+	<tr><td colspan=2>&nbsp;</td></tr>
+	<tr>
+		<td colspan=2>
+			Am Ende des kommt noch die Nummer des WLAN ran. Mögliche Werte sind:
+			<ul>
+				<li>WLAN=1 : Das 2,4GHz StandardWLAN.</li>
+				<li>WLAN=2 : Das 5GHz WLAN wenn vorhanden, ansonsten das GästeWLAN.</li>
+				<li>WLAN=3 : Das Gäste WLAN wenn das 5GHz WLAN vorhanden ist.</li>
+			</ul>
+		</td>
+	</tr>
+</table>
+<h3>DECT Aktoren schalten</h3>
+<form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
+	<input type="hidden" name="savedata" id="savedata" value="1">
+	<div class="form-group">
+		<table class="formtable" border="0" width="100%">
+			<tr>
+				<td width="25%">
+					<label id="labeldectswitches">DECT Aktoren:</label>
+				</td>
+				<td width="50%">
+					<select id="DECTswList" name="DECTswList" data-mini="true" onchange="setDECTSwitchCommands(this);">
+<!--$DECTSwitchessellist-->
+					</select>
+				</td>
+				<td width="25%">
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td colspan=2>
+					<b>virtueller Ausgang in der Config</b>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Adresse:
+				</td>
+				<td>
+					http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->
+				</td>
+			</tr>
+			<tr><td colspan=2>&nbsp;</td></tr>
+			<tr>
+				<td colspan=2>
+					<b>virtueller Ausgang Befehl</b>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Befehle bei Ein:
+				</td>
+				<td colspan=2>
+					<a href="" target="_blank" id="DECTswON"></a>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Befehle bei Aus:
+				</td>
+				<td colspan=2>
+					<a href="" target="_blank" id="DECTswOFF"></a>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					virtueller HTTP-Eingang:<br />Abfrage der Informationen
+				</td>
+				<td colspan=2>
+					<a href="" target="_blank" id="DECTInfo"></a>
+				</td>
+			</tr>
+		</table>
+	</div>
+</form>
+
 <script>
 		var $messages = $('#form-error-message');
 		$.validate({
