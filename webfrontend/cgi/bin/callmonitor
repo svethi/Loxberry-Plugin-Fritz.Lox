@@ -72,6 +72,7 @@ sub senddata {
 				);
 				if ($mssock) {
 					if ($txCaller ne "-") {
+						if (length($txCaller) == 0) {$txCaller = "anonym";}
 						if ($Debug != 0) {print "Caller ($txCaller) auf Leitung $ConnID an $MSName senden.\n";}
 						$req = $ua->get("http://$MSUser:$MSPass\@$MiniServer:$MSWebPort/dev/sps/io/CMCaller$ConnID/$txCaller");
 						if ($Debug > 1) {printf "%s\n", $req->content;}
