@@ -164,6 +164,27 @@ if (strlen($cmd) > 0) {
 		}
 		print "\n\t]\n}\n";
 		break;
+	case "WANgetInfo":
+			$client = new SoapClient(
+				null,
+				array(
+					'location' => "http://".$FBIP.":49000/igdupnp/control/WANCommonIFC1",
+					'uri'      => "urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1",
+					'noroot'   => True,
+					'login'    => $FBLogin,
+					'password' => $FBPass
+				)
+			);
+			try {
+				$res = $client->GetCommonLinkProperties();
+				print_r($res);
+				$res = $client->GetAddonInfos();
+				print_r($res);
+			} catch (SoapFault $fault) {
+				//print_r($fault);
+			print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+			}
+		break;
 	}
 } else {
 	echo "kein Befehl angegeben.";
