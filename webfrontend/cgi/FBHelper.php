@@ -185,6 +185,25 @@ if (strlen($cmd) > 0) {
 			print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
 			}
 		break;
+	case "WANgetIPInfo":
+			$client = new SoapClient(
+				null,
+				array(
+					'location' => "http://".$FBIP.":49000/igdupnp/control/WANIPConn1",
+					'uri'      => "urn:schemas-upnp-org:service:WANIPConnection:1",
+					'noroot'   => True,
+					'login'    => $FBLogin,
+					'password' => $FBPass
+				)
+			);
+			try {
+				$res = $client->GetExternalIPAddress();
+				print_r($res);
+			} catch (SoapFault $fault) {
+				//print_r($fault);
+			print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+			}
+		break;
 	}
 } else {
 	echo "kein Befehl angegeben.";
