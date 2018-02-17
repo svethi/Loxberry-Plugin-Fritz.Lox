@@ -43,13 +43,13 @@ $psubfolder =~ s/(.*)\/(.*)\/(.*)$/$2/g;
 # read fritzlox configs
 $conf = new Config::Simple("$home/config/plugins/$psubfolder/fritzlox.conf");
 
-print "Content-Type: text/html\n\n";
+print "Content-Type: application/json\n\n";
 $MS = $query{'MS'};
 $MSUDPPort = $conf->param("MINISERVER$MS.UDPPort");
 $MSenabled = $conf->param("MINISERVER$MS.SendData");
 if (length($MSUDPPort) == 0) {$MSUDPPort = 7000;}
 if (length($MSenabled) == 0) {$MSenabled = 0;}
-print "{UDPPort:$MSUDPPort,\n";
-print "SendData:$MSenabled}";
+print "{\"UDPPort\": \"$MSUDPPort\",\n";
+print "\"SendData\": \"$MSenabled\"}";
 
 exit;

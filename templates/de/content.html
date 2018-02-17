@@ -1,9 +1,10 @@
 <script>
-window.onload = atthebeginning();
+$('document').ready(atthebeginning);
 function atthebeginning() {
 	selMS(document.getElementById("miniserver"));
-	document.getElementById("do").disabled = true;
+	document.getElementByI("do").disabled = true;
 	//enablesubmit();
+alert("test");
 	checkFB(true);
 	setDECTSwitchCommands(document.getElementById("DECTswList"));
 }
@@ -22,31 +23,16 @@ function setDECTSwitchCommands(selobject) {
 
 function selMS(selobject)
 {
-    if (window.XMLHttpRequest)
-    {
-        // AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
-        xmlhttp=new XMLHttpRequest();
-    }
-    else
-    {
-        // AJAX mit IE6, IE5
-        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    xmlhttp.onreadystatechange=function()
-    {
-        if (xmlhttp.readyState==4 && xmlhttp.status==200)
-        {
-        	var MS = eval('('+xmlhttp.responseText+')');
-          document.getElementById("msudpport").value=MS.UDPPort;
-          $('#msenabled').val(MS.SendData).flipswitch('refresh');
-          $("#do").prop('disabled', true);
-          $("#do").button('refresh');
-        }
-    }
-    document.getElementById("msudpport").value="";
-    selectedMS = selobject.options[selobject.selectedIndex].value;
-    xmlhttp.open("GET","/admin/plugins/<!--$psubfolder-->/selMS.cgi?MS="+selectedMS,true);
-    xmlhttp.send();
+    $('#msudpport').val("");
+    selectedMS = $('#miniserver').val();
+    $.get("/admin/plugins/<!--$psubfolder-->/selMS.cgi",{MS:selectedMS})
+	    .done(function(data){
+		    $("#msudpport").val(data.UDPPort);
+		    $("#msenabled").val(data.SendData).flipswitch('refresh');
+		    $("#do").prop("disabled",true);
+		    $("#do").button('refresh');
+	    });
+
 }
 function enablesubmit()
 {
@@ -56,34 +42,19 @@ function enablesubmit()
 
 function checkFB(start)
 {
-    if (window.XMLHttpRequest)
-    {
-        // AJAX nutzen mit IE7+, Chrome, Firefox, Safari, Opera
-        xmlcheck=new XMLHttpRequest();
-    }
-    else
-    {
-        // AJAX mit IE6, IE5
-        xmlcheck=new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    xmlcheck.onreadystatechange=function()
-    {
-        if (xmlcheck.readyState==4 && xmlcheck.status==200)
-        {
-        	var FB = eval('('+xmlcheck.responseText+')');
-        	if (FB.check ==1) {
-        		$('#fbusepb').flipswitch('enable');
-        	} else {
-        		if (start == false) $('#fbusepb').val(0).flipswitch('refresh');
-        		$('#fbusepb').flipswitch('disable');
-        	}
-        }
-    }
-    var FBIP = document.getElementById("fritzboxip").value;
-    var FBLogin = document.getElementById("fblogin").value;
-    var FBPass = document.getElementById("fbpass").value;
-    xmlcheck.open("GET","/admin/plugins/<!--$psubfolder-->/checkFB.php?fbIP="+FBIP+"&fbLogin="+FBLogin+"&fbPass="+FBPass,true);
-    xmlcheck.send();
+    var FBIP = $("#fritzboxip").val();
+    var FBLogin = $("#fblogin").val();
+    var FBPass = $("#fbpass").val();
+    $.get("/admin/plugins/<!--$psubfolder-->/checkFB.php",{fbIP:FBIP, fbLogin:FBLogin, fbPass:FBPass})
+	.done(function(data){
+		alert("test");
+		if (data.check == 1) {
+			$('#fbusepb').flipswitch('enable');
+		} else {
+			if (start == false) $('#fbusepb').val(0).flipswitch('refresh');
+			$('#fbusepb').flipswitch('disable');
+		}
+	});
 }
 </script>
 
@@ -190,7 +161,7 @@ function checkFB(start)
 														</td>
 													</tr>
 													<tr>
-														<td width="25%">&nbsp</td>
+														<td width="25%">&nbsp;</td>
 														<td width="50%">
 															<input id="do" name="do" type="submit" value="Angaben speichern">
 														</td>

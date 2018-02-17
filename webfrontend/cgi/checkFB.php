@@ -16,8 +16,8 @@ $client = new SoapClient(
 );
 try {
 	$result = $client->GetPhonebook(new SoapParam(0,"NewPhonebookID"));
-	print "{check:1}";
+	print '{"check": "1"}';
 } catch (SoapFault $fault) {
-	print "{check:0}";
+	print '{"check": "0"}';
 }
 ?>
