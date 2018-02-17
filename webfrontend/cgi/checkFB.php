@@ -1,5 +1,6 @@
 <?php
 
+header('Content-Type: application/json');
 $FBIP = $_GET['fbIP'];
 $FBLogin = $_GET['fbLogin'];
 $FBPass = $_GET['fbPass'];

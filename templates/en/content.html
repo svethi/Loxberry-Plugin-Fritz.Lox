@@ -2,7 +2,7 @@
 $('document').ready(atthebeginning);
 function atthebeginning() {
 	selMS(document.getElementById("miniserver"));
-	document.getElementByID("do").disabled = true;
+	document.getElementById("do").disabled = true;
 	//enablesubmit();
 	checkFB(true);
 	setDECTSwitchCommands(document.getElementById("DECTswList"));
@@ -44,7 +44,7 @@ function checkFB(start)
     var FBIP = $("#fritzboxip").val();
     var FBLogin = $("#fblogin").val();
     var FBPass = $("#fbpass").val();
-    $.get("/admin/plugins/<!--$psubfolder-->/checkFB.php",{fbIP: FBIP, fbLogin: FBLogin, fbPass: FBPass})
+    $.get("/admin/plugins/<!--$psubfolder-->/checkFB.php",{fbIP:FBIP, fbLogin:FBLogin, fbPass:FBPass})
 	.done(function(data){
 		if (data.check == 1) {
 			$('#fbusepb').flipswitch('enable');
