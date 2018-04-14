@@ -185,6 +185,27 @@ if (strlen($cmd) > 0) {
 			print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
 			}
 		break;
+	case "WLANgetInfo":
+		if (strlen($WLAN) > 0) {
+			$client = new SoapClient(
+				null,
+				array(
+					'location' => "http://".$FBIP.":49000/upnp/control/wlanconfig".$WLAN,
+					'uri'      => "urn:dslforum-org:service:WLANConfiguration:".$WLAN,
+					'noroot'   => True,
+					'login'    => $FBLogin,
+					'password' => $FBPass
+				)
+			);
+			try {
+				$res = $client->GetInfo();
+				print_r($res);
+			} catch (SoapFault $fault) {
+				//print_r($fault);
+			print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+			}
+		}
+		break;
 	case "WANgetIPInfo":
 			$client = new SoapClient(
 				null,
