@@ -25,10 +25,6 @@ foreach (split(/&/,$ENV{'QUERY_STRING'}))
   $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
   $query{$namef} = $value;
 }
-	
-# Figure out in which subfolder we are installed
-$psubfolder = abs_path($0);
-$psubfolder =~ s/(.*)\/(.*)\/(.*)$/$2/g;
 
 # read fritzlox configs
 $conf = new Config::Simple("$lbpconfigdir/fritzlox.conf");
