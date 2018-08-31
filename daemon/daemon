@@ -19,7 +19,7 @@
 case "$1" in
         'start')
                 log_daemon_msg "Starting callmonitor service" "callmonitor"
-                cd REPLACEINSTALLFOLDER/webfrontend/cgi/plugins/REPLACEFOLDERNAME/bin
+                cd REPLACEINSTALLFOLDER/webfrontend/htmlauth/plugins/REPLACEFOLDERNAME/bin
                 ./callmonitor >> REPLACEINSTALLFOLDER/log/plugins/REPLACEFOLDERNAME/callmonitor.log &
                 log_end_msg 0 ;;
         'stop')
@@ -29,7 +29,7 @@ case "$1" in
         'restart')
                 log_daemon_msg "Restarting callmonitor service" "callmonitor"
                 /usr/bin/killall callmonitor &
-                cd REPLACEINSTALLFOLDER/webfrontend/cgi/plugins/REPLACEFOLDERNAME/bin
+                cd REPLACEINSTALLFOLDER/webfrontend/htmlauth/plugins/REPLACEFOLDERNAME/bin
                 ./callmonitor >> REPLACEINSTALLFOLDER/log/plugins/REPLACEFOLDERNAME/callmonitor.log &
                 log_end_msg 0;;
         '')

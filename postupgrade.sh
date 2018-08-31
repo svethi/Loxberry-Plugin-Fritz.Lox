@@ -13,5 +13,8 @@ cp -p -v -r /tmp/$ARGV1\_upgrade/config/* $ARGV5/config/plugins/$ARGV3/
 echo "<INFO> Remove temporary folders"
 rm -r /tmp/$ARGV1\_upgrade
 
+echo "<INFO> unlink /etc/init.d/callmonitor"
+rm -f "/etc/init.d/callmonitor"
+
 # Exit with Status 0
 exit 0

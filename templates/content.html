@@ -11,12 +11,12 @@ function atthebeginning() {
 function setDECTSwitchCommands(selobject) {
 	if ($("#DECTswList option").size() > 0) {
 		selAIN=selobject.options[selobject.selectedIndex].value;
-		document.getElementById("DECTswON").innerHTML = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchON&DECTAIN=" + selAIN;
-		document.getElementById("DECTswON").href = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchON&DECTAIN=" + selAIN;
-		document.getElementById("DECTswOFF").innerHTML = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
-		document.getElementById("DECTswOFF").href = "/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
-		document.getElementById("DECTInfo").innerHTML = "http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
-		document.getElementById("DECTInfo").href = "http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
+		document.getElementById("DECTswON").innerHTML = "/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTswitchON&DECTAIN=" + selAIN;
+		document.getElementById("DECTswON").href = "/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTswitchON&DECTAIN=" + selAIN;
+		document.getElementById("DECTswOFF").innerHTML = "/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
+		document.getElementById("DECTswOFF").href = "/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
+		document.getElementById("DECTInfo").innerHTML = "http://<TMPL_VAR lxbUser>:DEIN-<TMPL_VAR lxbUser>-PASSWORT@<TMPL_VAR localip>/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
+		document.getElementById("DECTInfo").href = "http://<TMPL_VAR lxbUser>:DEIN-<TMPL_VAR lxbUser>-PASSWORT@<TMPL_VAR localip>/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
 	}
 }
 
@@ -24,7 +24,7 @@ function selMS(selobject)
 {
     $('#msudpport').val("");
     selectedMS = $('#miniserver').val();
-    $.get("/admin/plugins/<!--$psubfolder-->/selMS.cgi",{MS:selectedMS})
+    $.get("/admin/plugins/<TMPL_VAR psubfolder>/selMS.cgi",{MS:selectedMS})
 	    .done(function(data){
 		    $("#msudpport").val(data.UDPPort);
 		    $("#msenabled").val(data.SendData).flipswitch('refresh');
@@ -44,7 +44,7 @@ function checkFB(start)
     var FBIP = $("#fritzboxip").val();
     var FBLogin = $("#fblogin").val();
     var FBPass = $("#fbpass").val();
-    $.get("/admin/plugins/<!--$psubfolder-->/checkFB.php",{fbIP:FBIP, fbLogin:FBLogin, fbPass:FBPass})
+    $.get("/admin/plugins/<TMPL_VAR psubfolder>/checkFB.php",{fbIP:FBIP, fbLogin:FBLogin, fbPass:FBPass})
 	.done(function(data){
 		if (data.check == 1) {
 			$('#fbusepb').flipswitch('enable');
@@ -60,18 +60,18 @@ function checkFB(start)
 <div class=\"ui-body ui-body-a ui-corner-all loxberry-logo\">
 <div style=\"margin: 5%;\">
 
-<h2>Einstellungen</h2>
+<h2><TMPL_VAR HEADER.SETTINGS></h2>
 									<form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
 										<input type="hidden" name="savedata" id="savedata" value="1">
 											<div class="form-group">
 												<table class="formtable" border="0" width="100%">
 													<tr>
 														<td width="25%">
-															<label id="labelfbip">Fritzbox-IP:</label>
+															<label id="labelfbip"><TMPL_VAR LABEL.FBIP></label>
 														</td>
 														<td width="50%">
 															<input id="fritzboxip" name="fritzboxip" type="text" class="textfield" oninput="enablesubmit();" onchange="checkFB(false);"
-																value="<!--$FritzboxIP-->" data-validation-error-msg="* Bitte die Fritzbox IP-Adresse angeben">
+																value="<TMPL_VAR FritzboxIP>" data-validation-error-msg="<TMPL_VAR ERROR.FBIP>">
 														</td>
 														<td width="25%">
 															&nbsp;
@@ -79,11 +79,11 @@ function checkFB(start)
 													</tr>
 													<tr>
 														<td width="25%">
-															<label id="labelfblogin">Fritzbox-Login:</label>
+															<label id="labelfblogin"><TMPL_VAR LABEL.FBLOGIN></label>
 														</td>
 														<td width="50%">
 															<input id="fblogin" name="fblogin" type="text" class="textfield" oninput="enablesubmit();" onchange="checkFB(false);"
-																value="<!--$FBLogin-->" data-validation-error-msg="* Bitte den Fritzbox Loginnamen angeben">
+																value="<TMPL_VAR FBLogin>" data-validation-error-msg="<TMPL_VAR ERROR.FBLOGIN>">
 														</td>
 														<td width="25%">
 															&nbsp;
@@ -91,11 +91,11 @@ function checkFB(start)
 													</tr>
 													<tr>
 														<td width="25%">
-															<label id="labelfbpass">Fritzbox-Passwort:</label>
+															<label id="labelfbpass"><TMPL_VAR LABEL.FBPASS></label>
 														</td>
 														<td width="50%">
 															<input id="fbpass" name="fbpass" type="text" class="textfield" oninput="enablesubmit();" onchange="checkFB(false);"
-																value="<!--$FBPass-->" data-validation-error-msg="* Bitte das Fritzbox Passwort angeben">
+																value="<TMPL_VAR FBPass>" data-validation-error-msg="<TMPL_VAR ERROR.FBPASS>">
 														</td>
 														<td width="25%">
 															&nbsp;
@@ -103,13 +103,13 @@ function checkFB(start)
 													</tr>
 													<tr>
 														<td width="25%">
-															<label id="labelfbusepb">FB Telefonbuch verwenden:</label>
+															<label id="labelfbusepb"><TMPL_VAR LABEL.USEFBPHONEBOOK></label>
 														</td>
 														<td width="50%">
 														<fieldset onclick="enablesubmit();">
 																<select id="fbusepb" name="fbusepb" data-role="flipswitch">
-																	<option <!--$FBusePbno--> value="0">Nein</option>
-																	<option <!--$FBusePbyes--> value="1">Ja</option>
+																	<option <TMPL_VAR FBusePbno> value="0"><TMPL_VAR LABEL.USEFBPBNO></option>
+																	<option <TMPL_VAR FBusePbyes> value="1"><TMPL_VAR LABEL.USEFBPBYES></option>
 																</select>
 															</fieldset>
 														</td>
@@ -119,11 +119,11 @@ function checkFB(start)
 													</tr>
 													<tr>
 														<td width="25%">
-															<label id="labelms">MiniServer:</label>
+															<label id="labelms"><TMPL_VAR LABEL.MSNAME></label>
 														</td>
 														<td width="50%">
 															<select id="miniserver" name="miniserver" data-mini="true" onchange="selMS(this);">
-<!--$MSselectlist-->
+<TMPL_VAR MSselectlist>
 															</select>
 														</td>
 														<td width="25%">
@@ -132,11 +132,11 @@ function checkFB(start)
 													</tr>
 													<tr>
 														<td width="25%">
-															<label id="labelmsudpport">MiniServer UDP-Port:</label>
+															<label id="labelmsudpport"><TMPL_VAR LABEL.MSUDPPORT></label>
 														</td>
 														<td width="50%">
 															<input id="msudpport" name="msudpport" type="text" oninput="enablesubmit();" class="textfield"
-																value="" data-validation-error-msg="* Bitte den MiniServer UDP-Port angeben">
+																value="" data-validation-error-msg="<TMPL_VAR ERROR.MSUDPPORT>">
 														</td>
 														<td width="25%">
 															&nbsp;
@@ -144,13 +144,13 @@ function checkFB(start)
 													</tr>
 													<tr>
 														<td width="25%">
-															<label id="labelmsenabled">Daten an diesen MS senden:</label>
+															<label id="labelmsenabled"><TMPL_VAR LABEL.SENDDATATOMS></label>
 														</td>
 														<td width="50%">
 														<fieldset onclick="enablesubmit()">
 																<select id="msenabled" name="msenabled" data-role="flipswitch">
-																	<option value="0">Nein</option>
-																	<option value="1">Ja</option>
+																	<option value="0"><TMPL_VAR LABEL.SENDDATANO></option>
+																	<option value="1"><TMPL_VAR LABEL.SENDDATAYES></option>
 																</select>
 															</fieldset>
 														</td>
@@ -161,110 +161,119 @@ function checkFB(start)
 													<tr>
 														<td width="25%">&nbsp;</td>
 														<td width="50%">
-															<input id="do" name="do" type="submit" value="Angaben speichern">
+															<input id="do" name="do" type="submit" value="<TMPL_VAR LABEL.SAVEDATA>">
 														</td>
 														<td width="25%">
 															&nbsp;
 														</td>
-													</tr>		
+													</tr>
+													<tr>
+														<td width="25%">&nbsp;</td>
+														<td width="50%">
+															<button onclick="window.open('/admin/system/tools/logfile.cgi?logfile=<TMPL_VAR logdir>/fritzlox.log&amp;header=html&amp;format=template', 'log'); return false;"><TMPL_VAR LABEL.SHOWLOG></button>
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
 											</table>
 										</div>
 									</form>
-<!--$restartMsg-->
-<h2>Einrichtungshilfe</h2>
-<h3>DSL Informationen abrufen</h3>
+<TMPL_VAR restartMsg>
+<h2><TMPL_VAR LABEL.CONFHINTS></h2>
+<h3><TMPL_VAR LABEL.QUERYDSLDATA></h3>
 <table border=0>
 	<tr>
 		<td colspan=2>
-			<b>virtueller HTTP-Eingang in der Config</b>
+			<b><TMPL_VAR LABEL.VINPUT> <TMPL_VAR LABEL.INCONFIG></b>
 		</td>
 	</tr>
 	<tr>
 		<td>
-			Adresse:
+			<TMPL_VAR LABEL.ADDRESS>
 		</td>
 		<td>
-			<a href="http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=WANgetInfo" target="_blank">http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=WANgetInfo</a>
+			<a href="http://<TMPL_VAR lxbUser>:<TMPL_VAR LABEL.YOUR>-<TMPL_VAR lxbUser>-<TMPL_VAR LABEL.PASSWORD>@<TMPL_VAR localip>/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=WANgetInfo" target="_blank">http://<TMPL_VAR lxbUser>:DEIN-<TMPL_VAR lxbUser>-PASSWORT@<TMPL_VAR localip>/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=WANgetInfo</a>
 		</td>
 	</tr>
 </table>
-<h3>&ouml;ffentliche IP abrufen</h3>
+<h3><TMPL_VAR LABEL.QUERYWANIP></h3>
 <table border=0>
 	<tr>
 		<td colspan=2>
-			<b>virtueller HTTP-Eingang in der Config</b>
+			<b><TMPL_VAR LABEL.VINPUT> <TMPL_VAR LABEL.INCONFIG></b>
 		</td>
 	</tr>
 	<tr>
 		<td>
-			Adresse:
+			<TMPL_VAR LABEL.ADDRESS>
 		</td>
 		<td>
-			<a href="http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=WANgetIPInfo" target="_blank">http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=WANgetIPInfo</a>
+			<a href="http://<TMPL_VAR lxbUser>:<TMPL_VAR LABEL.YOUR>-<TMPL_VAR lxbUser>-<TMPL_VAR LABEL.PASSWORD>@<TMPL_VAR localip>/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=WANgetIPInfo" target="_blank">http://<TMPL_VAR lxbUser>:DEIN-<TMPL_VAR lxbUser>-PASSWORT@<TMPL_VAR localip>/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=WANgetIPInfo</a>
 		</td>
 	</tr>
 </table>
-<h3>WLAN aktivieren/deaktivieren</h3>
+<h3><TMPL_VAR LABEL.DEANDACTIVATEWLAN></h3>
 <table border=0>
 	<tr>
 		<td colspan=2>
-			<b>virtueller Ausgang in der Config</b>
+			<b><TMPL_VAR LABEL.VOUTPUT> <TMPL_VAR LABEL.INCONFIG></b>
 		</td>
 	</tr>
 	<tr>
 		<td>
-			Adresse:
+			<TMPL_VAR LABEL.ADDRESS>
 		</td>
 		<td>
-			http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->
+			http://<TMPL_VAR lxbUser>:<TMPL_VAR LABEL.YOUR>-<TMPL_VAR lxbUser>-<TMPL_VAR LABEL.PASSWORD>@<TMPL_VAR localip>
 		</td>
 	</tr>
 	<tr><td colspan=2>&nbsp;</td></tr>
 	<tr>
 		<td colspan=2>
-			<b>virtueller Ausgang Befehl</b>
+			<b><TMPL_VAR LABEL.VOUTPUT> <TMPL_VAR LABEL.COMMAND></b>
 		</td>
 	</tr>
 	<tr>
 		<td>
-			Befehle bei Ein:
+			<TMPL_VAR LABEL.COMMANDON>
 		</td>
 		<td>
-		/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=enableWLAN&WLAN=
+		/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=enableWLAN&WLAN=
 		</td>
 	</tr>
 	<tr>
 		<td>
-		Befehle bei Aus:
+		<TMPL_VAR LABEL.COMMANDOFF>
 		</td>
 		<td>
-			/admin/plugins/<!--$psubfolder-->/FBHelper.php?cmd=disableWLAN&WLAN=
+			/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=disableWLAN&WLAN=
 		</td>
 	</tr>
 	<tr><td colspan=2>&nbsp;</td></tr>
 	<tr>
 		<td colspan=2>
-			Am Ende des kommt noch die Nummer des WLAN ran. Mögliche Werte sind:
+			<TMPL_VAR LABEL.HINTNUMBERWLAN>
 			<ul>
-				<li>WLAN=1 : Das 2,4GHz StandardWLAN.</li>
-				<li>WLAN=2 : Das 5GHz WLAN wenn vorhanden, ansonsten das GästeWLAN.</li>
-				<li>WLAN=3 : Das Gäste WLAN wenn das 5GHz WLAN vorhanden ist.</li>
+				<li>WLAN=1 : <TMPL_VAR LABEL.WLAN1></li>
+				<li>WLAN=2 : <TMPL_VAR LABEL.WLAN2></li>
+				<li>WLAN=3 : <TMPL_VAR LABEL.WLAN3></li>
 			</ul>
 		</td>
 	</tr>
 </table>
-<h3>DECT Aktoren schalten</h3>
+<h3><TMPL_VAR LABEL.SWITCHDECTACTORS></h3>
 <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
 	<input type="hidden" name="savedata" id="savedata" value="1">
 	<div class="form-group">
 		<table class="formtable" border="0" width="100%">
 			<tr>
 				<td width="25%">
-					<label id="labeldectswitches">DECT Aktoren:</label>
+					<label id="labeldectswitches"><TMPL_VAR LABEL.DECTACTORS></label>
 				</td>
 				<td width="50%">
 					<select id="DECTswList" name="DECTswList" data-mini="true" onchange="setDECTSwitchCommands(this);">
-<!--$DECTSwitchessellist-->
+<TMPL_VAR DECTSwitchessellist>
 					</select>
 				</td>
 				<td width="25%">
@@ -273,26 +282,26 @@ function checkFB(start)
 			</tr>
 			<tr>
 				<td colspan=2>
-					<b>virtueller Ausgang in der Config</b>
+					<b><TMPL_VAR LABEL.VOUTPUT> <TMPL_VAR LABEL.INCONFIG></b>
 				</td>
 			</tr>
 			<tr>
 				<td>
-					Adresse:
+					<TMPL_VAR LABEL.ADDRESS>
 				</td>
 				<td>
-					http://<!--$lxbUser-->:DEIN-<!--$lxbUser-->-PASSWORT@<!--$localip-->
+					http://<TMPL_VAR lxbUser>:<TMPL_VAR LABEL.YOUR>-<TMPL_VAR lxbUser>-<TMPL_VAR LABEL.PASSWORD>@<TMPL_VAR localip>
 				</td>
 			</tr>
 			<tr><td colspan=2>&nbsp;</td></tr>
 			<tr>
 				<td colspan=2>
-					<b>virtueller Ausgang Befehl</b>
+					<b><TMPL_VAR LABEL.VOUTPUT> <TMPL_VAR LABEL.COMMAND></b>
 				</td>
 			</tr>
 			<tr>
 				<td>
-					Befehle bei Ein:
+					<TMPL_VAR LABEL.COMMANDON>
 				</td>
 				<td colspan=2>
 					<a href="" target="_blank" id="DECTswON"></a>
@@ -300,7 +309,7 @@ function checkFB(start)
 			</tr>
 			<tr>
 				<td>
-					Befehle bei Aus:
+					<TMPL_VAR LABEL.COMMANDOFF>
 				</td>
 				<td colspan=2>
 					<a href="" target="_blank" id="DECTswOFF"></a>
@@ -308,7 +317,7 @@ function checkFB(start)
 			</tr>
 			<tr>
 				<td>
-					virtueller HTTP-Eingang:<br />Abfrage der Informationen
+					<TMPL_VAR LABEL.VINPUT>:<br /><TMPL_VAR LABEL.QUERYINFORMATIONS>
 				</td>
 				<td colspan=2>
 					<a href="" target="_blank" id="DECTInfo"></a>

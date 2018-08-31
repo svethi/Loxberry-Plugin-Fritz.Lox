@@ -2,17 +2,15 @@
 
 STDOUT->autoflush(1);
 
-use File::HomeDir;
 use Config::Simple;
-use Cwd 'abs_path';
 use IO::Socket;
 use LWP::UserAgent;
 use Time::HiRes;
 use MIME::Base64;
 use strict;
  
-our $psubfolder = "REPLACEFOLDERNAME"; #"fritzlox";
-my $home = "REPLACEINSTALLFOLDER"; #"/opt/loxberry";		
+our $psubfolder = "REPLACEFOLDERNAME";
+my $home = "REPLACEINSTALLFOLDER";		
 my $cfg = new Config::Simple("$home/config/system/general.cfg");
 my $pcfg = new Config::Simple("$home/config/plugins/$psubfolder/fritzlox.conf");
 my $FRITZBOX=$pcfg->param("general.FritzboxIP");

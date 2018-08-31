@@ -7,27 +7,23 @@
 #   * and showing a message to the user.
 # That's all.
 
-use File::HomeDir;
+use LoxBerry::Web;
+use LoxBerry::Log;
 use CGI qw/:standard/;
-use Config::Simple;
-use Cwd 'abs_path';
-use IO::Socket::INET;
 use JSON qw( decode_json );
 use warnings;
 use strict;
 no strict "refs"; # we need it for template system
 
-my  $home = File::HomeDir->my_home;
 our $lang;
-my  $installfolder;
 my  $cfg;
 my  $conf;
 our $curl;
-our $psubfolder;
 our $localip;
 our $dotest;
 our $helptext;
 our $helplink;
+my $helptemplate;
 our $template_title;
 our $namef;
 our $value;
@@ -52,14 +48,23 @@ our $restartMsg;
 our $DECTSwitchessellist;
 our $lxbUser;
 
+my $log = LoxBerry::Log->new (
+        name => 'caldav4lox',
+        filename => "$lbplogdir/fritzlox.log",
+        append => 1,
+        addtime => 1
+);
+LOGSTART "Fritz.Lox configuration UI";
+
+LOGDEB "Read system settings";
 # Read Settings
-$cfg             = new Config::Simple("$home/config/system/general.cfg");
-$installfolder   = $cfg->param("BASE.INSTALLFOLDER");
+$cfg             = new Config::Simple("$lbhomedir/config/system/general.cfg");
 $lang            = $cfg->param("BASE.LANG");
 $curl            = $cfg->param("BINARIES.CURL");
+LOGDEB "Done";
 
-print "Content-Type: text/html\n\n";
 # Everything from URL
+LOGDEB "Read system settings";
 foreach (split(/&/,$ENV{"QUERY_STRING"}))
 {
   ($namef,$value) = split(/=/,$_,2);
@@ -77,12 +82,11 @@ foreach (split(/&/,$ENV{"QUERY_STRING"}))
   if ( !$query{'cache'} )        { if ( param('cache')        ) { $cache        = param('cache');                   } else { $cache        = "";     } } else { $cache        = $query{'cache'};                   }
   if ( !$query{'miniserver'} )   { if ( param('miniserver')   ) { $MiniServer   = param('miniserver');              } else { $MiniServer   = "1";        } } else { $MiniServer = $query{'miniserver'};              }
 # Figure out in which subfolder we are installed
-
-$psubfolder = abs_path($0);
-$psubfolder =~ s/(.*)\/(.*)\/(.*)$/$2/g;
+LOGDEB "Done";
 
 # read fritzlox configs
-$conf = new Config::Simple("$home/config/plugins/$psubfolder/fritzlox.conf");
+LOGDEB "read Fritz.Lox settings";
+$conf = new Config::Simple("$lbpconfigdir/fritzlox.conf");
 $FritzboxIP = $conf->param('general.FritzboxIP');
 $FBLogin = $conf->param('general.FBLogin');
 $FBPass = $conf->param('general.FBPass');
@@ -97,8 +101,11 @@ for (my $i = 1; $i <= $cfg->param('BASE.MINISERVERS');$i++) {
 		$MSselectlist .= '																<option value="'.$i.'">'.$cfg->param("MINISERVER$i.NAME")."</option>\n";
 	}
 }
+LOGDEB "Done";
 
+LOGDEB "Retrieving DECT switcheslist";
 my $json = `php -f ./FBHelper.php`;
+LOGDEB "Response: $json";
 my $decoded = decode_json($json);
 my @Switches = @{$decoded->{'Switches'}};
 my $i;
@@ -109,37 +116,24 @@ foreach (@Switches) {
 		$DECTSwitchessellist .= '																<option value="'.$_->{'AIN'}.'">'.$_->{'name'}."</option>\n";
 	}
 }
-
-if ( $FritzboxIP eq "" ) {
-	my $gw = `netstat -nr`;
-	$gw =~ m/0.0.0.0\s+([0-9]+.[0-9]+.[0-9]+.[0-9]+)/g;
-	$FritzboxIP = $1;
-}
-
-# Init Language
-	# Clean up lang variable
-	$lang         =~ tr/a-z//cd; $lang         = substr($lang,0,2);
-  # If there's no language phrases file for choosed language, use german as default
-		if (!-e "$installfolder/templates/system/$lang/language.dat") 
-		{
-  		$lang = "de";
-	}
-	# Read translations / phrases
-		$languagefile 			= "$installfolder/templates/system/$lang/language.dat";
-		$phrase 						= new Config::Simple($languagefile);
-		$languagefileplugin = "$installfolder/templates/plugins/$psubfolder/$lang/language.dat";
-		$phraseplugin 			= new Config::Simple($languagefileplugin);
+LOGDEB "Done";
 
 # Get Local IP and GW IP
-my $sock = IO::Socket::INET->new(
-                       PeerAddr=> "example.com",
-                       PeerPort=> 80,
-                       Proto   => "tcp");
-$localip = $sock->sockhost;
+LOGDEB "retrieve the local ip";
+my $localip = LoxBerry::System::get_localip();
+LOGDEB "localIP: $localip";
+LOGDEB "Done";
 
+LOGDEB "retrieve the defaul gateway";
 my $gw = `netstat -nr`;
 $gw =~ m/0.0.0.0\s+([0-9]+.[0-9]+.[0-9]+.[0-9]+)/g;
 my $gwip = $1;
+LOGDEB "gateway: $gwip";
+LOGDEB "Done";
+
+if ( $FritzboxIP eq "" ) {
+	$FritzboxIP = $gwip;
+}
 
 # Clean up savedata variable
 $savedata =~ tr/0-1//cd;
@@ -147,6 +141,7 @@ $savedata = substr($savedata,0,1);
 
 #save data?
 if ($savedata == 1) {
+	LOGDEB "Saving UI Settings";
   if ( !$query{'fritzboxip'} )   { if ( param('fritzboxip')   ) { $FritzboxIP   = param('fritzboxip');              } else { $FritzboxIP   = $FritzboxIP;} } else { $FritzboxIP = quotemeta($query{'fritzboxip'});   }
   if ( !$query{'msudpport'} )    { if ( param('msudpport')    ) { $MSUDPPort    = param('msudpport');               } else { $MSUDPPort    = "7000";     } } else { $MSUDPPort  = $query{'msudpport'};               }
   if ( !$query{'fblogin'} )      { if ( param('fblogin')      ) { $FBLogin      = param('fblogin');                 } else { $FBLogin      = "";         } } else { $FBLogin  = $query{'fblogin'}; }
@@ -162,52 +157,60 @@ if ($savedata == 1) {
 	$restartMsg = '													<table><tr>
 														<td width="25%">&nbsp</td>
 														<td width="50%">
-															<span style="color: red;">Die Einstellungen wurden geändert. Um diese zu übernehmen, muss der Loxberry neugestartet werden.</span>
+															<span style="color: red;"><!--noticerestartmsg--></span>
 														</td>
 														<td width="25%">
 															&nbsp;
 														</td>
-													</tr></table>'."\n";
+													</tr></table>
+													';
+	LOGDEB "Done";
 }
 if ($FBusePb==1) {
 	$FBusePbyes='selected="selected"';
 } else {
 	$FBusePbno='selected="selected"';
 }
+
+LOGDEB "create the page - beginn";
 # Title
-$template_title = $phrase->param("TXT0000") . ": Fritz.Lox";
+$template_title = "Fritz.Lox";
 
 # Create help page
 $helplink = "http://www.loxwiki.eu/display/LOXBERRY/Fritz.Lox";
-open(F,"$installfolder/templates/plugins/$psubfolder/$lang/help.html") || die "Missing template $lang/help.html";
-  while (<F>) {
-    $_ =~ s/<!--\$(.*?)-->/${$1}/g;
-    $helptext .= $_;
-  }
-close(F);
+$helptemplate = "help.html";
 
-# Load header and replace HTML Markup <!--$VARNAME--> with perl variable $VARNAME
-open(F,"$installfolder/templates/system/$lang/header.html") || die "Missing template system/$lang/header.html";
-  while (<F>) {
-    $_ =~ s/<!--\$(.*?)-->/${$1}/g;
-    print $_;
-  }
-close(F);
+LOGDEB "print out the header";
+LoxBerry::Web::lbheader(undef, $helplink, $helptemplate);
+
+LOGDEB "create the content";
 
 # Load content from template
-open(F,"$installfolder/templates/plugins/$psubfolder/$lang/content.html") || die "Missing template $lang/content.html";
-  while (<F>) {
-    $_ =~ s/<!--\$(.*?)-->/${$1}/g;
-    print $_;
-  }
-close(F);
+my $maintemplate = HTML::Template->new(
+    filename => "$lbptemplatedir/content.html",
+    global_vars => 1,
+    loop_context_vars => 1,
+    die_on_bad_params => 0,
+);
+%L = LoxBerry::System::readlanguage($maintemplate, "language.ini");
+$restartMsg =~ s/<!--noticerestartmsg-->/$L{'LABEL.RESTARTMSG'}/g;
 
-# Load footer and replace HTML Markup <!--$VARNAME--> with perl variable $VARNAME
-open(F,"$installfolder/templates/system/$lang/footer.html") || die "Missing template system/$lang/header.html";
-  while (<F>) {
-    $_ =~ s/<!--\$(.*?)-->/${$1}/g;
-    print $_;
-  }
-close(F);
+$maintemplate->param("psubfolder",$lbpplugindir);
+$maintemplate->param("FritzboxIP", $FritzboxIP);
+$maintemplate->param("FBLogin", $FBLogin);
+$maintemplate->param("lang",lblanguage());
+$maintemplate->param("FBPass",$FBPass);
+$maintemplate->param("MSselectlist",$MSselectlist);
+$maintemplate->param("restartMsg",$restartMsg);
+$maintemplate->param("lxbUser",$lxbUser);
+$maintemplate->param("localip",$localip);
+$maintemplate->param("DECTSwitchessellist",$DECTSwitchessellist);
+$maintemplate->param("logdir",$lbplogdir);
+  
+print $maintemplate->output;
+
+LOGDEB "print out the footer";
+LoxBerry::Web::lbfooter();
+LOGEND "Done";
 
 exit;

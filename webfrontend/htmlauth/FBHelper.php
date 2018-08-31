@@ -1,15 +1,9 @@
 <?php
 
-$home = posix_getpwuid(posix_getuid());
-$home = $home['dir'];
-
-# Figure out in which subfolder we are installed
-
-$psubfolder = __FILE__;
-$psubfolder = preg_replace('/(.*)\/(.*)\/(.*)$/',"$2", $psubfolder);
+require_once "loxberry_system.php";
 
 //Get conffile
-$fritzloxconf = parse_ini_file("$home/config/plugins/$psubfolder/fritzlox.conf",True);
+$fritzloxconf = parse_ini_file("$lbpconfigdir/fritzlox.conf",True);
 
 $FBIP = $fritzloxconf['general']['FritzboxIP'];
 $FBLogin = $fritzloxconf['general']['FBLogin'];
@@ -145,7 +139,7 @@ if (strlen($cmd) > 0) {
 				$res = $client->GetGenericDeviceInfos(new SoapParam($i,'NewIndex'));
 				if ($res['NewSwitchIsEnabled'] == "ENABLED") {
 					if ($i>0) print ",\n";
-					print "\n\t\t{\n\t\t\t".'"name":"'.$res['NewDeviceName'].'",';
+					print "\n\t\t{\n\t\t\t".'"name":"'.utf8_encode($res['NewDeviceName']).'",';
 					print "\n\t\t\t".'"AIN":"'.str_replace(" ","+",$res['NewAIN']).'"'."\n\t\t}";
 				}
 			} catch (SoapFault $fault) {

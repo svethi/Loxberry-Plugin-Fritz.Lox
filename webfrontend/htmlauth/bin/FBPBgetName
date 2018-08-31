@@ -27,7 +27,7 @@ foreach($xml->phonebook->children() as $child) {
 	$numbers = $child->telephony->number;
 	for ($i = 0; $i < count($numbers); $i++) {
 		if (preg_match($test,$numbers[$i])) {
-			echo $child->person->realName;
+			echo utf8_encode($child->person->realName);
 			$found = 1;
 			exit;
 		}
