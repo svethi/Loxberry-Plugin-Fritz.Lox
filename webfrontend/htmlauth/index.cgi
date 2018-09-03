@@ -120,6 +120,8 @@ LOGDEB "Done";
 
 # Get Local IP and GW IP
 LOGDEB "retrieve the local ip";
+#patch for missing in LB < 1.2.4
+require IO::Socket::INET;
 my $localip = LoxBerry::System::get_localip();
 LOGDEB "localIP: $localip";
 LOGDEB "Done";
