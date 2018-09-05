@@ -49,22 +49,21 @@ our $DECTSwitchessellist;
 our $lxbUser;
 
 my $log = LoxBerry::Log->new (
-        name => 'caldav4lox',
+        name => 'Fritz.Lox',
         filename => "$lbplogdir/fritzlox.log",
         append => 1,
-        addtime => 1
 );
 LOGSTART "Fritz.Lox configuration UI";
 
-LOGDEB "Read system settings";
+LOGINF "Read system settings";
 # Read Settings
 $cfg             = new Config::Simple("$lbhomedir/config/system/general.cfg");
 $lang            = $cfg->param("BASE.LANG");
 $curl            = $cfg->param("BINARIES.CURL");
-LOGDEB "Done";
+LOGOK "system settings readed";
 
 # Everything from URL
-LOGDEB "Read system settings";
+LOGINF "load query values";
 foreach (split(/&/,$ENV{"QUERY_STRING"}))
 {
   ($namef,$value) = split(/=/,$_,2);
@@ -82,10 +81,10 @@ foreach (split(/&/,$ENV{"QUERY_STRING"}))
   if ( !$query{'cache'} )        { if ( param('cache')        ) { $cache        = param('cache');                   } else { $cache        = "";     } } else { $cache        = $query{'cache'};                   }
   if ( !$query{'miniserver'} )   { if ( param('miniserver')   ) { $MiniServer   = param('miniserver');              } else { $MiniServer   = "1";        } } else { $MiniServer = $query{'miniserver'};              }
 # Figure out in which subfolder we are installed
-LOGDEB "Done";
+LOGOK "query values loaded";
 
 # read fritzlox configs
-LOGDEB "read Fritz.Lox settings";
+LOGINF "read Fritz.Lox settings";
 $conf = new Config::Simple("$lbpconfigdir/fritzlox.conf");
 $FritzboxIP = $conf->param('general.FritzboxIP');
 $FBLogin = $conf->param('general.FBLogin');
@@ -101,9 +100,9 @@ for (my $i = 1; $i <= $cfg->param('BASE.MINISERVERS');$i++) {
 		$MSselectlist .= '																<option value="'.$i.'">'.$cfg->param("MINISERVER$i.NAME")."</option>\n";
 	}
 }
-LOGDEB "Done";
+LOGOK "Fritz.Box settings readed";
 
-LOGDEB "Retrieving DECT switcheslist";
+LOGINF "Retrieving DECT switches list";
 my $json = `php -f ./FBHelper.php`;
 LOGDEB "Response: $json";
 my $decoded = decode_json($json);
@@ -116,22 +115,22 @@ foreach (@Switches) {
 		$DECTSwitchessellist .= '																<option value="'.$_->{'AIN'}.'">'.$_->{'name'}."</option>\n";
 	}
 }
-LOGDEB "Done";
+LOGOK "DECT switches list retrieved";
 
 # Get Local IP and GW IP
-LOGDEB "retrieve the local ip";
+LOGINF "retrieve the local ip";
 #patch for missing in LB < 1.2.4
 require IO::Socket::INET;
 my $localip = LoxBerry::System::get_localip();
 LOGDEB "localIP: $localip";
-LOGDEB "Done";
+LOGOK "local IP retrieved";
 
-LOGDEB "retrieve the defaul gateway";
+LOGINF "retrieve the defaul gateway";
 my $gw = `netstat -nr`;
 $gw =~ m/0.0.0.0\s+([0-9]+.[0-9]+.[0-9]+.[0-9]+)/g;
 my $gwip = $1;
 LOGDEB "gateway: $gwip";
-LOGDEB "Done";
+LOGOK "default gateway retrieved";
 
 if ( $FritzboxIP eq "" ) {
 	$FritzboxIP = $gwip;
@@ -143,7 +142,7 @@ $savedata = substr($savedata,0,1);
 
 #save data?
 if ($savedata == 1) {
-	LOGDEB "Saving UI Settings";
+	LOGINF "Saving UI Settings";
   if ( !$query{'fritzboxip'} )   { if ( param('fritzboxip')   ) { $FritzboxIP   = param('fritzboxip');              } else { $FritzboxIP   = $FritzboxIP;} } else { $FritzboxIP = quotemeta($query{'fritzboxip'});   }
   if ( !$query{'msudpport'} )    { if ( param('msudpport')    ) { $MSUDPPort    = param('msudpport');               } else { $MSUDPPort    = "7000";     } } else { $MSUDPPort  = $query{'msudpport'};               }
   if ( !$query{'fblogin'} )      { if ( param('fblogin')      ) { $FBLogin      = param('fblogin');                 } else { $FBLogin      = "";         } } else { $FBLogin  = $query{'fblogin'}; }
@@ -166,7 +165,7 @@ if ($savedata == 1) {
 														</td>
 													</tr></table>
 													';
-	LOGDEB "Done";
+	LOGOK "UI settings saved";
 }
 if ($FBusePb==1) {
 	$FBusePbyes='selected="selected"';
@@ -174,7 +173,7 @@ if ($FBusePb==1) {
 	$FBusePbno='selected="selected"';
 }
 
-LOGDEB "create the page - beginn";
+LOGINF "create the page - beginn";
 # Title
 $template_title = "Fritz.Lox";
 
@@ -182,10 +181,10 @@ $template_title = "Fritz.Lox";
 $helplink = "http://www.loxwiki.eu/display/LOXBERRY/Fritz.Lox";
 $helptemplate = "help.html";
 
-LOGDEB "print out the header";
+LOGINF "print out the header";
 LoxBerry::Web::lbheader(undef, $helplink, $helptemplate);
 
-LOGDEB "create the content";
+LOGINF "create the content";
 
 # Load content from template
 my $maintemplate = HTML::Template->new(
@@ -211,7 +210,7 @@ $maintemplate->param("logdir",$lbplogdir);
   
 print $maintemplate->output;
 
-LOGDEB "print out the footer";
+LOGINF "print out the footer";
 LoxBerry::Web::lbfooter();
 LOGEND "Done";
 

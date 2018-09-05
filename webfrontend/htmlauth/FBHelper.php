@@ -1,13 +1,20 @@
 <?php
 
 require_once "loxberry_system.php";
+require_once "loxberry_log.php";
+
+$mylog = LBLog::newLog(array("name" => "Fritz.Lox", "filename" => $lbplogdir."/fritzlox.log"));
+
+if (php_sapi_name() != 'cli') LOGSTART("FBHelper startet");
 
 //Get conffile
+LOGINF("reading configuration");
 $fritzloxconf = parse_ini_file("$lbpconfigdir/fritzlox.conf",True);
 
 $FBIP = $fritzloxconf['general']['FritzboxIP'];
 $FBLogin = $fritzloxconf['general']['FBLogin'];
 $FBPass = $fritzloxconf['general']['FBPass'];
+LOGINF("Done");
 
 $WLAN = (isset($_GET['WLAN'])) ? $_GET['WLAN'] : "";
 $cmd = (isset($_GET['cmd'])) ? $_GET['cmd'] : "";
@@ -17,6 +24,7 @@ if (php_sapi_name() == 'cli') $cmd = "DECTgetSwitchList";
 if (strlen($cmd) > 0) {
 	switch ($cmd) {
 	case "enableWLAN":
+		LOGINF("enableWLAN triggered");
 		if (strlen($WLAN) > 0) {
 			$client = new SoapClient(
 				null,
@@ -32,13 +40,16 @@ if (strlen($cmd) > 0) {
 				$client->SetEnable(new SoapParam(true,'NewEnable'));
 				//$res = $client->{"X_AVM-DE_GetWLANExtInfo"}();
 				//print_r($res);
+				LOGOK("WLAN should be enabled");
 				print "OK";
 			} catch (SoapFault $fault) {
-			print $fault->faultstring;
+					LOGERR($fault->faultstring);
+					print $fault->faultstring;
 			}
 		}
 		break;
 	case "disableWLAN":
+		LOGINF("disableWLAN triggered");
 		if (strlen($WLAN) > 0) {
 			$client = new SoapClient(
 				null,
@@ -54,13 +65,16 @@ if (strlen($cmd) > 0) {
 				$client->SetEnable(new SoapParam(false,'NewEnable'));
 				//$res = $client->{"X_AVM-DE_GetWLANExtInfo"}();
 				//print_r($res);
+				LOGOK("WLAN should be disabled.");
 				print "OK";
 			} catch (SoapFault $fault) {
-				print $fault->faultstring;
+					LOGERR($fault->faultstring);
+					print $fault->faultstring;
 			}
 		}
 		break;
 	case "DECTswitchOFF":
+		LOGINF("DECTswitchOFF triggered");
 		if (strlen($FBDECTAIN) > 0) {
 			$client = new SoapClient(
 				null,
@@ -74,13 +88,16 @@ if (strlen($cmd) > 0) {
 			);
 			try {
 				$client->SetSwitch(new SoapParam("$FBDECTAIN",'NewAIN'),new SoapParam(OFF,'NewSwitchState'));
+				LOGOK("Actor should be off.");
 				print "OK";
 			} catch (SoapFault $fault) {
-				print $fault->faultstring;
+					LOGERR($fault->faultstring);
+					print $fault->faultstring;
 			}
 		}
 		break;
 	case "DECTswitchON":
+		LOGINF("DECTswitchON");
 		if (strlen($FBDECTAIN) > 0) {
 			$client = new SoapClient(
 				null,
@@ -94,13 +111,16 @@ if (strlen($cmd) > 0) {
 			);
 			try {
 				$client->SetSwitch(new SoapParam("$FBDECTAIN",'NewAIN'),new SoapParam(ON,'NewSwitchState'));
+				LOGOK("Actor should be on.");
 				print "OK";
 			} catch (SoapFault $fault) {
-				print $fault->faultstring;
+					LOGERR($fault->faultstring);
+					print $fault->faultstring;
 			}
 		}
 		break;
 	case "DECTgetInfo":
+		LOGINF("DECTgetInfo triggered");
 		if (strlen($FBDECTAIN) > 0) {
 			$client = new SoapClient(
 				null,
@@ -114,14 +134,18 @@ if (strlen($cmd) > 0) {
 			);
 			try {
 				$res = $client->GetSpecificDeviceInfos(new SoapParam($FBDECTAIN,'NewAIN'));
+				LOGOK("DECT info retrieved.");
+				LOGDEB(print_r($res,true));
 				print_r($res);
 			} catch (SoapFault $fault) {
 				//print_r($fault);
-			print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+				LOGERR("Error: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n");
+				print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
 			}
 		}
 		break;
 	case "DECTgetSwitchList":
+		LOGINF("DECTgetSwitchList triggered");
 		$client = new SoapClient(
 			null,
 			array(
@@ -132,11 +156,13 @@ if (strlen($cmd) > 0) {
 				'password' => $FBPass
 			)
 		);
+		$err=0;
 		print "{\n\t".'"Switches":'."\n\t[";
 		for ($i = 0; $i < 1000; $i++) {
 			try {
 				//$res = $client->GetSpecificDeviceInfos(new SoapParam($FBDECTAIN,'NewAIN'));
 				$res = $client->GetGenericDeviceInfos(new SoapParam($i,'NewIndex'));
+				LOGDEB(print_r($res,true));
 				if ($res['NewSwitchIsEnabled'] == "ENABLED") {
 					if ($i>0) print ",\n";
 					print "\n\t\t{\n\t\t\t".'"name":"'.utf8_encode($res['NewDeviceName']).'",';
@@ -149,6 +175,8 @@ if (strlen($cmd) > 0) {
 					if ($fault->detail->UPnPError->errorCode == 713) {
 						//keine weiteren Geräte
 					} else {
+						$err=1;
+						LOGDEB(print_r($fault));
 						//print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
 					}
 				} else {
@@ -156,9 +184,15 @@ if (strlen($cmd) > 0) {
 				}
 			}
 		}
+		if ($err == 1) {
+			LOGERR("error while retrieving DECTList");
+		} else {
+			LOGOK("DECTList retrieved");
+		}
 		print "\n\t]\n}\n";
 		break;
 	case "WANgetInfo":
+		LOGINf("WANgetInfo triggered");
 			$client = new SoapClient(
 				null,
 				array(
@@ -171,15 +205,21 @@ if (strlen($cmd) > 0) {
 			);
 			try {
 				$res = $client->GetCommonLinkProperties();
+				LOGDEB(print_r($res,true));
 				print_r($res);
 				$res = $client->GetAddonInfos();
+				LOGDEB(print_r($res,true));
 				print_r($res);
+				LOGOK("WAN Info retrieved");
 			} catch (SoapFault $fault) {
 				//print_r($fault);
-			print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+				LOGERR("error while retrieving WAN infos");
+				LOGDEB($fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n");
+				print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
 			}
 		break;
 	case "WLANgetInfo":
+		LOGINF("WLANgetInfo triggered");
 		if (strlen($WLAN) > 0) {
 			$client = new SoapClient(
 				null,
@@ -193,14 +233,19 @@ if (strlen($cmd) > 0) {
 			);
 			try {
 				$res = $client->GetInfo();
+				LOGOK("WLAN info retrieved");
+				LOGDEB(print_r($res));
 				print_r($res);
 			} catch (SoapFault $fault) {
 				//print_r($fault);
-			print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+				LOGERR("error while retrieving WLAN info");
+				LOGDEB($fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n");
+				print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
 			}
 		}
 		break;
 	case "WANgetIPInfo":
+			LOGINF("WANgetIPInfo triggered");
 			$client = new SoapClient(
 				null,
 				array(
@@ -213,14 +258,20 @@ if (strlen($cmd) > 0) {
 			);
 			try {
 				$res = $client->GetExternalIPAddress();
+				LOGOK("WAN IP retrieved");
+				LOGDEB(print_r($res));
 				print_r($res);
 			} catch (SoapFault $fault) {
 				//print_r($fault);
-			print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+				LOGERR("error while retrieving WLAN info");
+				LOGDEB($fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n");
+				print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
 			}
 		break;
 	}
 } else {
+	LOGWARN("no command given.");
 	echo "kein Befehl angegeben.";
 }
+if (php_sapi_name() != 'cli') LOGEND("FBHelper finished.");
 ?>
