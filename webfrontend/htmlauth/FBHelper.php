@@ -174,13 +174,15 @@ if (strlen($cmd) > 0) {
 				if (isset($fault->detail)) {
 					if ($fault->detail->UPnPError->errorCode == 713) {
 						//keine weiteren Geräte
+						LOGINF("Keine weiteren Geräte.");
 					} else {
 						$err=1;
-						LOGDEB(print_r($fault));
+						LOGDEB(print_r($fault,true));
 						//print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
 					}
 				} else {
 					//print_r($fault);
+					LOGDEB(print_r($fault,true));
 				}
 			}
 		}
