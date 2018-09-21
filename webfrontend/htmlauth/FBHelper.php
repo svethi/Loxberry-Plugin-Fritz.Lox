@@ -157,6 +157,7 @@ if (strlen($cmd) > 0) {
 			)
 		);
 		$err=0;
+		$first = true;
 		print "{\n\t".'"Switches":'."\n\t[";
 		for ($i = 0; $i < 1000; $i++) {
 			try {
@@ -164,9 +165,10 @@ if (strlen($cmd) > 0) {
 				$res = $client->GetGenericDeviceInfos(new SoapParam($i,'NewIndex'));
 				LOGDEB(print_r($res,true));
 				if ($res['NewSwitchIsEnabled'] == "ENABLED") {
-					if ($i>0) print ",\n";
+					if ($first != true) print ",\n";
 					print "\n\t\t{\n\t\t\t".'"name":"'.utf8_encode($res['NewDeviceName']).'",';
 					print "\n\t\t\t".'"AIN":"'.str_replace(" ","+",$res['NewAIN']).'"'."\n\t\t}";
+					$first = false;
 				}
 			} catch (SoapFault $fault) {
 				//print_r($fault);
