@@ -105,14 +105,18 @@ LOGOK "Fritz.Box settings readed";
 LOGINF "Retrieving DECT switches list";
 my $json = `php -f ./FBHelper.php`;
 LOGDEB "Response: $json";
-my $decoded = decode_json($json);
-my @Switches = @{$decoded->{'Switches'}};
-my $i;
-foreach (@Switches) {
-	if ($i == 0) {
-		$DECTSwitchessellist .= '																<option selected value="'.$_->{'AIN'}.'">'.$_->{'name'}."</option>\n";
-	} else {
-		$DECTSwitchessellist .= '																<option value="'.$_->{'AIN'}.'">'.$_->{'name'}."</option>\n";
+my $decoded = eval{decode_json($json)};
+if ($@) {
+	LOGERR "invalid JSON: $@";
+} else {
+	my @Switches = @{$decoded->{'Switches'}};
+	my $i;
+	foreach (@Switches) {
+		if ($i == 0) {
+			$DECTSwitchessellist .= '																<option selected value="'.$_->{'AIN'}.'">'.$_->{'name'}."</option>\n";
+		} else {
+			$DECTSwitchessellist .= '																<option value="'.$_->{'AIN'}.'">'.$_->{'name'}."</option>\n";
+		}
 	}
 }
 LOGOK "DECT switches list retrieved";
