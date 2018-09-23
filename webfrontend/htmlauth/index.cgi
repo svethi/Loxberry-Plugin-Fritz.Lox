@@ -211,6 +211,8 @@ $maintemplate->param("lxbUser",$lxbUser);
 $maintemplate->param("localip",$localip);
 $maintemplate->param("DECTSwitchessellist",$DECTSwitchessellist);
 $maintemplate->param("logdir",$lbplogdir);
+$maintemplate->param("FBusePbno",$FBusePbno);
+$maintemplate->param("FBusePbyes",$FBusePbyes);
   
 print $maintemplate->output;
 
