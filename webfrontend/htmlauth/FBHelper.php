@@ -238,7 +238,7 @@ if (strlen($cmd) > 0) {
 			try {
 				$res = $client->GetInfo();
 				LOGOK("WLAN info retrieved");
-				LOGDEB(print_r($res));
+				LOGDEB(print_r($res,true));
 				print_r($res);
 			} catch (SoapFault $fault) {
 				//print_r($fault);
@@ -263,7 +263,7 @@ if (strlen($cmd) > 0) {
 			try {
 				$res = $client->GetExternalIPAddress();
 				LOGOK("WAN IP retrieved");
-				LOGDEB(print_r($res));
+				LOGDEB(print_r($res,true));
 				print_r($res);
 			} catch (SoapFault $fault) {
 				//print_r($fault);
