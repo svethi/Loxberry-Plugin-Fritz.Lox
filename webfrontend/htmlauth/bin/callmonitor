@@ -17,6 +17,7 @@ my $FRITZBOX=$pcfg->param("general.FritzboxIP");
 my $FBLogin=$pcfg->param("general.FBLogin");
 my $FBPass=$pcfg->param("general.FBPass");
 my $FBusePhonebook=$pcfg->param("general.FBusePhonebook");
+my $PBID=$pcfg->param("general.Phonebook");
 my $datum;
 my $Command;
 my $ConnID;
@@ -105,6 +106,7 @@ if ( $FRITZBOX eq "" ) {
 
 if ( $FBLogin eq "" ) { $FBLogin = "1"; }
 if ( $FBPass eq "" ) { $FBPass = "1"; }
+if ( $PBID eq "" ) { $PBID = "0"; }
 
 do {
 
@@ -128,7 +130,7 @@ do {
 			if ($Debug != 0 ) {print "Eingehender Anruf auf Leitung $ConnID.\n";}
 			if ($FBusePhonebook) {
 				if ($Debug != 0) {print "Anrufer auf Leitung $ConnID ermitteln.\n";}
-				$Name = qx(./FBPBgetName $Caller $FBLogin $FBPass $FRITZBOX);
+				$Name = qx(./FBPBgetName $Caller $FBLogin $FBPass $FRITZBOX $PBID);
 				if (length($Name) > 0) {
 					if ($Debug != 0) {print "$Name auf Leitung $ConnID.\n";}
 					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Name,$Recipient,$ConnID);
@@ -145,7 +147,7 @@ do {
 			if ($Debug !=0 ) {print "Ausgehender Anruf auf Leitung $ConnID.\n";}
 			if ($FBusePhonebook) {
 				if ($Debug != 0) {print "Angerufener auf Leitung $ConnID ermitteln.\n";}
-				$Name = qx(./FBPBgetName $Recipient $FBLogin $FBPass $FRITZBOX);
+				$Name = qx(./FBPBgetName $Recipient $FBLogin $FBPass $FRITZBOX $PBID);
 				if (length($Name) > 0) {
 					if ($Debug != 0) {print "$Name auf Leitung $ConnID.\n";}
 					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;$extension;3;0",$Caller,$Name,$ConnID);

@@ -16,9 +16,28 @@ $client = new SoapClient(
     )
 );
 try {
-	$result = $client->GetPhonebook(new SoapParam(0,"NewPhonebookID"));
-	print '{"check": "1"}';
+	$result = explode(",",$client->GetPhonebookList());
 } catch (SoapFault $fault) {
-	print '{"check": "0"}';
+	//print_r($fault);
+	$result = [];
+}
+if (count($result) == 0) {
+	print '{ "Phonebooks": "0" }';
+} else {
+	print "{\n\t".'"Phonebooks": "'.count($result).'"'.",\n";
+	$id = 0;
+	foreach ($result as $pbook) {
+		$pb = $client->GetPhonebook(new SoapParam($pbook,'NewPhonebookID'));
+		print "\t".'"'.$id.'":'."\n\t{\n";
+		print "\t\t".'"ID": "'.$pbook.'"'.",\n";
+		print "\t\t".'"Name": "'.$pb['NewPhonebookName'].'"'."\n\t}";
+		$id ++;
+		if ($id < count($result)) { 
+			print ",\n";
+		} else {
+			print "\n";
+		}
+	}
+	print "}\n";
 }
 ?>

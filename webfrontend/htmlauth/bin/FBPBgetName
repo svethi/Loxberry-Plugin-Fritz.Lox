@@ -5,6 +5,7 @@ $number = $argv[1];
 $login = $argv[2];
 $pass = $argv[3];
 $IP = $argv[4];
+$PBID = $argv[5];
 
 $found = 0;
 $client = new SoapClient(
@@ -17,7 +18,7 @@ $client = new SoapClient(
 			'password'   => $pass
     )
 );
-$result = $client->GetPhonebook(new SoapParam(0,"NewPhonebookID"));
+$result = $client->GetPhonebook(new SoapParam($PBID,"NewPhonebookID"));
 $xml = @simplexml_load_file($result['NewPhonebookURL']);
 
 $number +=0;

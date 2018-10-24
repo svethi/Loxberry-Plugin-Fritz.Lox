@@ -40,6 +40,7 @@ our $FBPass;
 our $FBusePb;
 our $FBusePbno;
 our $FBusePbyes;
+our $PBselected;
 our $MSUDPPort;
 our $savedata;
 our $MSselectlist;
@@ -90,6 +91,8 @@ $FritzboxIP = $conf->param('general.FritzboxIP');
 $FBLogin = $conf->param('general.FBLogin');
 $FBPass = $conf->param('general.FBPass');
 $FBusePb = $conf->param('general.FBusePhonebook');
+$PBselected = $conf->param('general.Phonebook');
+if ( !$PBselected ) {$PBselected = 0;}
 $MSUDPPort = "7000";
 $lxbUser = $ENV{'REMOTE_USER'};
 
@@ -152,10 +155,12 @@ if ($savedata == 1) {
   if ( !$query{'fblogin'} )      { if ( param('fblogin')      ) { $FBLogin      = param('fblogin');                 } else { $FBLogin      = "";         } } else { $FBLogin  = $query{'fblogin'}; }
   if ( !$query{'fbpass'} )       { if ( param('fbpass')       ) { $FBPass       = param('fbpass');                  } else { $FBPass       = "";         } } else { $FBPass  = $query{'fbpass'};  }
   if ( !$query{'fbusepb'} )      { if ( param('fbusepb')      ) { $FBusePb      = param('fbusepb');                 } else { $FBusePb      = "0";        } } else { $FBusePb  = $query{'fbusepb'};  }
+  if ( !$query{'pblist'} )       { if ( param('pblist')       ) { $PBselected   = param('pblist');                  } else { $PBselected   = "0";        } } else { $PBselected = $query{'pblist'};  }
 	$conf->param('general.FritzboxIP',"$FritzboxIP");
 	$conf->param('general.FBLogin',"$FBLogin");
 	$conf->param('general.FBPass',"$FBPass");
 	$conf->param('general.FBusePhonebook',"$FBusePb");
+	$conf->param('general.Phonebook',"$PBselected");
 	$conf->param("MINISERVER$MiniServer.UDPPort","$MSUDPPort");
 	$conf->param("MINISERVER$MiniServer.SendData",param('msenabled'));
 	$conf->save();
@@ -179,6 +184,7 @@ if ($FBusePb==1) {
 
 LOGINF "create the page - beginn";
 # Title
+
 $template_title = "Fritz.Lox";
 
 # Create help page
@@ -213,6 +219,7 @@ $maintemplate->param("DECTSwitchessellist",$DECTSwitchessellist);
 $maintemplate->param("logdir",$lbplogdir);
 $maintemplate->param("FBusePbno",$FBusePbno);
 $maintemplate->param("FBusePbyes",$FBusePbyes);
+$maintemplate->param("PBSELECTED",$PBselected);
   
 print $maintemplate->output;
 

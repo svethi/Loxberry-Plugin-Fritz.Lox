@@ -44,13 +44,29 @@ function checkFB(start)
     var FBIP = $("#fritzboxip").val();
     var FBLogin = $("#fblogin").val();
     var FBPass = $("#fbpass").val();
+    var PBselected = <TMPL_VAR PBSELECTED>;
+    var selectPB = "";
     $.get("/admin/plugins/<TMPL_VAR psubfolder>/checkFB.php",{fbIP:FBIP, fbLogin:FBLogin, fbPass:FBPass})
 	.done(function(data){
-		if (data.check == 1) {
+		$('#pblist').empty();
+		if (data.Phonebooks > 0) {
 			$('#fbusepb').flipswitch('enable');
+			$('#pblist').removeAttr('disabled');
+			var option='';
+			for (var i=0; i < data.Phonebooks; i++)
+			{
+				if ((data[i].ID == PBselected && start == true) || (i == 0 && start == false)) {
+					selectPB = data[i].ID;
+				}
+				option += '<option value="'+ data[i].ID + '">' + data[i].Name + '</option>';
+			}
+			$('#pblist').append(option);
+			$('#pblist').val(selectPB).change();
 		} else {
 			if (start == false) $('#fbusepb').val(0).flipswitch('refresh');
 			$('#fbusepb').flipswitch('disable');
+			$('#pblist').val('').change();
+			$('#pblist').attr('disabled','disabled');
 		}
 	});
 }
@@ -111,6 +127,21 @@ function checkFB(start)
 																	<option <TMPL_VAR FBusePbno> value="0"><TMPL_VAR LABEL.USEFBPBNO></option>
 																	<option <TMPL_VAR FBusePbyes> value="1"><TMPL_VAR LABEL.USEFBPBYES></option>
 																</select>
+															</fieldset>
+														</td>
+														<td width="25%">
+															&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td width="25%">
+															<label id="labelphonebook"><TMPL_VAR LABEL.PHONEBOOK></label>
+														</td>
+														<td width="50%">
+														<fieldset onclick="enablesubmit();">
+															<select id="pblist" name="pblist" data-mini="true">
+																<!-- autoload via AJAX -->
+															</select>
 															</fieldset>
 														</td>
 														<td width="25%">
