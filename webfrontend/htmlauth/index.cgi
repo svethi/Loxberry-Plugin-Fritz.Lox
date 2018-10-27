@@ -51,8 +51,7 @@ our $lxbUser;
 
 my $log = LoxBerry::Log->new (
         name => 'Fritz.Lox',
-        filename => "$lbplogdir/fritzlox.log",
-        append => 1,
+        logdir => "$lbplogdir",
 );
 LOGSTART "Fritz.Lox configuration UI";
 

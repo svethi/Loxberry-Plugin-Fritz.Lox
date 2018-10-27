@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "<INFO> callmonitor stoppen."
+service callmonitor stop
+
+echo "<INFO> unlink /etc/init.d/callmonitor"
+rm -f "/etc/init.d/callmonitor"

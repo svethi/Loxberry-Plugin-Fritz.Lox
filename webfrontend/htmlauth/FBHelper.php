@@ -3,9 +3,13 @@
 require_once "loxberry_system.php";
 require_once "loxberry_log.php";
 
-$mylog = LBLog::newLog(array("name" => "Fritz.Lox", "filename" => $lbplogdir."/fritzlox.log"));
+$mylog = LBLog::newLog(array("name" => "FBHelper", "logdir" => $lbplogdir));
 
-if (php_sapi_name() != 'cli') LOGSTART("FBHelper startet");
+if (php_sapi_name() != 'cli') {
+	LOGSTART("Web Request");
+} else {
+	LOGSTART("CLI Request");
+}
 
 //Get conffile
 LOGINF("reading configuration");
@@ -277,5 +281,5 @@ if (strlen($cmd) > 0) {
 	LOGWARN("no command given.");
 	echo "kein Befehl angegeben.";
 }
-if (php_sapi_name() != 'cli') LOGEND("FBHelper finished.");
+LOGEND("FBHelper finished.");
 ?>
