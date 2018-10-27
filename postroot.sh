@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ -h "/etc/init.d/callmonitor"]
+if [ -h "/etc/init.d/callmonitor" ]
 then
 	
 	echo "<INFO> callmonitor stoppen."
