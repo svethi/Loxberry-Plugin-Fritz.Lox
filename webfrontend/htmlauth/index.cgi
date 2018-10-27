@@ -204,6 +204,8 @@ my $maintemplate = HTML::Template->new(
 );
 %L = LoxBerry::System::readlanguage($maintemplate, "language.ini");
 $restartMsg =~ s/<!--noticerestartmsg-->/$L{'LABEL.RESTARTMSG'}/g;
+my $logurl = LoxBerry::Web::loglist_url ();
+$logurl =~ s/\s+$//;
 
 $maintemplate->param("psubfolder",$lbpplugindir);
 $maintemplate->param("FritzboxIP", $FritzboxIP);
@@ -219,6 +221,7 @@ $maintemplate->param("logdir",$lbplogdir);
 $maintemplate->param("FBusePbno",$FBusePbno);
 $maintemplate->param("FBusePbyes",$FBusePbyes);
 $maintemplate->param("PBSELECTED",$PBselected);
+$maintemplate->param("LOGURL",$logurl);
   
 print $maintemplate->output;
 
