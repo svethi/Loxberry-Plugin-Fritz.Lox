@@ -25,6 +25,18 @@ $cmd = (isset($_GET['cmd'])) ? $_GET['cmd'] : "";
 $FBDECTAIN = (isset($_GET['DECTAIN'])) ? $_GET['DECTAIN'] : "";
 if (php_sapi_name() == 'cli') $cmd = "DECTgetSwitchList";
 
+function print_error($fault) {
+	if ( isset($fault->detail->UPnPError)) {
+		$errmsg = $fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+	} else {
+		$errmsg = $fault->faultstring . " (" .$fault->faultcode . ")\n";
+	}
+	//print_r($fault);
+	LOGERR("error while retrieving WAN infos");
+	LOGDEB(print_r($fault,true));
+	print "Fehler: ".$errmsg;
+}
+
 if (strlen($cmd) > 0) {
 	switch ($cmd) {
 	case "enableWLAN":
@@ -47,8 +59,7 @@ if (strlen($cmd) > 0) {
 				LOGOK("WLAN should be enabled");
 				print "OK";
 			} catch (SoapFault $fault) {
-					LOGERR($fault->faultstring);
-					print $fault->faultstring;
+				print_error($fault);
 			}
 		}
 		break;
@@ -72,8 +83,7 @@ if (strlen($cmd) > 0) {
 				LOGOK("WLAN should be disabled.");
 				print "OK";
 			} catch (SoapFault $fault) {
-					LOGERR($fault->faultstring);
-					print $fault->faultstring;
+					print_error($fault);
 			}
 		}
 		break;
@@ -95,8 +105,7 @@ if (strlen($cmd) > 0) {
 				LOGOK("Actor should be off.");
 				print "OK";
 			} catch (SoapFault $fault) {
-					LOGERR($fault->faultstring);
-					print $fault->faultstring;
+					print_error($fault);
 			}
 		}
 		break;
@@ -118,8 +127,7 @@ if (strlen($cmd) > 0) {
 				LOGOK("Actor should be on.");
 				print "OK";
 			} catch (SoapFault $fault) {
-					LOGERR($fault->faultstring);
-					print $fault->faultstring;
+					print_error($fault);
 			}
 		}
 		break;
@@ -142,9 +150,7 @@ if (strlen($cmd) > 0) {
 				LOGDEB(print_r($res,true));
 				print_r($res);
 			} catch (SoapFault $fault) {
-				//print_r($fault);
-				LOGERR("Error: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n");
-				print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+					print_error($fault);
 			}
 		}
 		break;
@@ -219,11 +225,9 @@ if (strlen($cmd) > 0) {
 				LOGDEB(print_r($res,true));
 				print_r($res);
 				LOGOK("WAN Info retrieved");
+				$errmsg = "";
 			} catch (SoapFault $fault) {
-				//print_r($fault);
-				LOGERR("error while retrieving WAN infos");
-				LOGDEB($fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n");
-				print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+					print_error($fault);
 			}
 		break;
 	case "WLANgetInfo":
@@ -245,10 +249,7 @@ if (strlen($cmd) > 0) {
 				LOGDEB(print_r($res,true));
 				print_r($res);
 			} catch (SoapFault $fault) {
-				//print_r($fault);
-				LOGERR("error while retrieving WLAN info");
-				LOGDEB($fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n");
-				print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+					print_error($fault);
 			}
 		}
 		break;
@@ -270,10 +271,7 @@ if (strlen($cmd) > 0) {
 				LOGDEB(print_r($res,true));
 				print_r($res);
 			} catch (SoapFault $fault) {
-				//print_r($fault);
-				LOGERR("error while retrieving WLAN info");
-				LOGDEB($fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n");
-				print "Fehler: ".$fault->detail->UPnPError->errorDescription." (".$fault->detail->UPnPError->errorCode.")\n";
+					print_error($fault);
 			}
 		break;
 	}
