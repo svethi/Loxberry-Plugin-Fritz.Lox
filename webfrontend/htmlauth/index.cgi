@@ -11,6 +11,7 @@ use LoxBerry::Web;
 use LoxBerry::Log;
 use CGI qw/:standard/;
 use JSON qw( decode_json );
+use Config::Simple qw/-strict/;
 use warnings;
 use strict;
 no strict "refs"; # we need it for template system
