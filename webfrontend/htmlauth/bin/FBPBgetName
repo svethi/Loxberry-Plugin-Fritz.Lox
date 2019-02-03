@@ -19,7 +19,15 @@ $client = new SoapClient(
     )
 );
 $result = $client->GetPhonebook(new SoapParam($PBID,"NewPhonebookID"));
-$xml = @simplexml_load_file($result['NewPhonebookURL']);
+$phonebook = file_get_contents($result['NewPhonebookURL']);
+if (preg_match("/<?xml.*encoding=\"(.*)\"/",$phonebook,$matches)) {
+	//echo "encoding: $matches[1]";
+	if ($matches[1] != "UTF-8" AND $matches[1] != "") {
+		$phonebook = iconv($matches[1],"UTF-8",$phonebook);
+		$phonebook = preg_replace("/$matches[1]/","UTF-8",$phonebook);
+	}
+}
+$xml = simplexml_load_string($phonebook);
 
 $number +=0;
 $test = "/".$number."$/";
@@ -28,7 +36,7 @@ foreach($xml->phonebook->children() as $child) {
 	$numbers = $child->telephony->number;
 	for ($i = 0; $i < count($numbers); $i++) {
 		if (preg_match($test,$numbers[$i])) {
-			echo utf8_encode($child->person->realName);
+			echo $child->person->realName;
 			$found = 1;
 			exit;
 		}
