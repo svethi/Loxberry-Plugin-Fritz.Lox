@@ -1,47 +1,24 @@
 #!/bin/bash
 
-### BEGIN INIT INFO
-# Provides:          callmonitor
-# Required-Start:    $all
-# Required-Stop::    $all
-# Should-Start:      $all
-# Should-Stop:       $all
-# Default-Start:
-# Default-Stop:      0 1 6
-# Short-Description: Start callmonitor at boot time
-# Description:       Manage the callmonitor daemon, a Fritzbox callmonitor for Loxberry.
-### END INIT INFO
+if [ -h /etc/systemd/system/callmonitor ]
+then
+	/bin/systemctl start callmonitor.service
+else
+	/bin/cat > /etc/systemd/system/callmonitor.service <<EOF
+[Unit]
+Description=the fritzlox callmonitor service
 
-#set -e
-#set -u
-#${DEBIAN_SCRIPT_DEBUG:+ set -v -x}
-. /lib/lsb/init-functions
-case "$1" in
-        'start')
-                log_daemon_msg "Starting callmonitor service" "callmonitor"
-                cd REPLACELBHOMEDIR/webfrontend/htmlauth/plugins/REPLACELBPPLUGINDIR/bin
-                ./callmonitor >> REPLACELBHOMEDIR/log/plugins/REPLACELBPPLUGINDIR/callmonitor.log &
-                log_end_msg 0 ;;
-        'stop')
-                log_daemon_msg "Stopping callmonitor service" "callmonitor"
-                /usr/bin/killall callmonitor &
-                log_end_msg 0;;
-        'restart')
-                log_daemon_msg "Restarting callmonitor service" "callmonitor"
-                /usr/bin/killall callmonitor &
-                cd REPLACELBHOMEDIR/webfrontend/htmlauth/plugins/REPLACELBPPLUGINDIR/bin
-                ./callmonitor >> REPLACELBHOMEDIR/log/plugins/REPLACELBPPLUGINDIR/callmonitor.log &
-                log_end_msg 0;;
-        '')
-                if [ -h /etc/init.d/callmonitor ]
-                then
-                  /usr/sbin/service callmonitor start
-                else
-                  ln -s REPLACELBHOMEDIR/system/daemons/plugins/REPLACELBPPLUGINDIR /etc/init.d/callmonitor
-                  /bin/systemctl daemon-reload
-                  /etc/init.d/callmonitor start
-                fi;;
-        *)
-                echo "usage $0 start|stop|restart" ;;
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+#if type=oneshot and RemainAfterExit=yes is not set, then the script stops immediately!
+EnvironmentFile=-/etc/environment
+WorkingDirectory=REPLACELBHOMEDIR/webfrontend/htmlauth/plugins/REPLACELBPPLUGINDIR/bin
+ExecStart=REPLACELBHOMEDIR/webfrontend/htmlauth/plugins/REPLACELBPPLUGINDIR/bin/callmonitor >> REPLACELBHOMEDIR/log/plugins/REPLACELBPPLUGINDIR/callmonitor.log
 
-esac
+[Install]
+WantedBy=multi-user.target
+EOF
+	/bin/systemctl daemon-reload
+	/bin/systemctl start callmonitor
+fi;;

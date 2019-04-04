@@ -6,6 +6,7 @@ function atthebeginning() {
 	//enablesubmit();
 	checkFB(true);
 	setDECTSwitchCommands(document.getElementById("DECTswList"));
+	setDECTHkrCommands(document.getElementById("DECTHkrList"));
 }
 
 function setDECTSwitchCommands(selobject) {
@@ -17,6 +18,21 @@ function setDECTSwitchCommands(selobject) {
 		document.getElementById("DECTswOFF").href = "/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTswitchOFF&DECTAIN=" + selAIN;
 		document.getElementById("DECTInfo").innerHTML = "http://<TMPL_VAR lxbUser>:DEIN-<TMPL_VAR lxbUser>-PASSWORT@<TMPL_VAR localip>/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
 		document.getElementById("DECTInfo").href = "http://<TMPL_VAR lxbUser>:DEIN-<TMPL_VAR lxbUser>-PASSWORT@<TMPL_VAR localip>/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
+	}
+}
+
+function setDECTHkrCommands(selobject) {
+	if ($("#DECTHkrList option").size() > 0) {
+		selAIN=selobject.options[selobject.selectedIndex].value;
+		NewTemp = document.getElementById("HkrTemp").value;
+		document.getElementById("DECTsetHkr").innerHTML = "/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTsetHkrTemp&DECTAIN=" + selAIN + "&value=&lt;v&gt;";
+		document.getElementById("DECTsetHkr").href = "/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTsetHkrTemp&DECTAIN=" + selAIN + "&value=" + NewTemp;
+		//document.getElementById("DECTsetHkrComf").innerHTML = "/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTsetHkrComfTemp&DECTAIN=" + selAIN + "&value=&lt;v&gt;";
+		//document.getElementById("DECTsetHkrComf").href = "/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTsetHkrComfTemp&DECTAIN=" + selAIN + "&value=" + NewTemp;
+		//document.getElementById("DECTsetHkrRed").innerHTML = "/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTsetHkrRedTemp&DECTAIN=" + selAIN + "&value=&lt;v&gt;";
+		//document.getElementById("DECTsetHkrRed").href = "/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTsetHkrRedTemp&DECTAIN=" + selAIN + "&value=" + NewTemp;
+		document.getElementById("DECTHkrInfo").innerHTML = "http://<TMPL_VAR lxbUser>:DEIN-<TMPL_VAR lxbUser>-PASSWORT@<TMPL_VAR localip>/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
+		document.getElementById("DECTHkrInfo").href = "http://<TMPL_VAR lxbUser>:DEIN-<TMPL_VAR lxbUser>-PASSWORT@<TMPL_VAR localip>/admin/plugins/<TMPL_VAR psubfolder>/FBHelper.php?cmd=DECTgetInfo&DECTAIN=" + selAIN;
 	}
 }
 
@@ -294,8 +310,8 @@ function checkFB(start)
 	</tr>
 </table>
 <h3><TMPL_VAR LABEL.SWITCHDECTACTORS></h3>
-<form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
-	<input type="hidden" name="savedata" id="savedata" value="1">
+<form method="post" data-ajax="false" name="sw_form" id="sw_form" action="./index.cgi">
+	<input type="hidden" name="savedata" id="savedata" value="0">
 	<div class="form-group">
 		<table class="formtable" border="0" width="100%">
 			<tr>
@@ -352,6 +368,88 @@ function checkFB(start)
 				</td>
 				<td colspan=2>
 					<a href="" target="_blank" id="DECTInfo"></a>
+				</td>
+			</tr>
+		</table>
+	</div>
+</form>
+<h3><TMPL_VAR LABEL.HKRDECTACTORS></h3>
+<form method="post" data-ajax="false" name="hkr_form" id="hkr_form" action="./index.cgi">
+	<input type="hidden" name="savedata" id="savedata" value="0">
+	<div class="form-group">
+		<table class="formtable" border="0" width="100%">
+			<tr>
+				<td width="25%">
+					<label id="labeldecthkrs"><TMPL_VAR LABEL.DECTHKRS></label>
+				</td>
+				<td width="50%">
+					<select id="DECTHkrList" name="DECTHkrList" data-mini="true" onchange="setDECTHkrCommands(this);">
+<TMPL_VAR DECTHkrssellist>
+					</select>
+				</td>
+				<td width="25%">
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td colspan=2>
+					<b><TMPL_VAR LABEL.VOUTPUT> <TMPL_VAR LABEL.INCONFIG></b>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<TMPL_VAR LABEL.ADDRESS>
+				</td>
+				<td>
+					http://<TMPL_VAR lxbUser>:<TMPL_VAR LABEL.YOUR>-<TMPL_VAR lxbUser>-<TMPL_VAR LABEL.PASSWORD>@<TMPL_VAR localip>
+				</td>
+			</tr>
+			<tr><td colspan=2>&nbsp;</td></tr>
+			<tr>
+				<td colspan=2>
+					<b><TMPL_VAR LABEL.VOUTPUT> <TMPL_VAR LABEL.COMMAND></b>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<TMPL_VAR LABEL.COMMANDSET>
+				</td>
+				<td colspan=2>
+					<a href="" target="_blank" id="DECTsetHkr"></a>
+				</td>
+			</tr>
+			<!-- tr>
+				<td>
+					<TMPL_VAR LABEL.COMMANDSETCOMF>
+				</td>
+				<td colspan=2>
+					<a href="" target="_blank" id="DECTsetHkrComf"></a>
+				</td>
+			</tr>			<tr>
+				<td>
+					<TMPL_VAR LABEL.COMMANDSETRED>
+				</td>
+				<td colspan=2>
+					<a href="" target="_blank" id="DECTsetHkrRed"></a>
+				</td>
+			</tr //-->
+			<tr>
+				<td width="25%">
+					<TMPL_VAR LABEL.HKRTEMP>
+				</td>
+				<td width="50%">
+					<input type="text" name="HkrTemp" id="HkrTemp" class="textfield" value="20" oninput="setDECTHkrCommands(document.getElementById('DECTHkrList'));">
+				</td>
+				<td width="25%">
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<TMPL_VAR LABEL.VINPUT>:<br /><TMPL_VAR LABEL.QUERYINFORMATIONS>
+				</td>
+				<td colspan=2>
+					<a href="" target="_blank" id="DECTHkrInfo"></a>
 				</td>
 			</tr>
 		</table>

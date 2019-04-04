@@ -48,6 +48,7 @@ our $MSselectlist;
 our $MiniServer;
 our $restartMsg;
 our $DECTSwitchessellist;
+our $DECTHkrssellist;
 our $lxbUser;
 
 my $log = LoxBerry::Log->new (
@@ -123,6 +124,25 @@ if ($@) {
 	}
 }
 LOGOK "DECT switches list retrieved";
+
+LOGINF "Retrieving DECT Hkrs list";
+my $json = `php -f ./FBHelper.php DECTgetHkrList`;
+LOGDEB "Response: $json";
+my $decoded = eval{decode_json($json)};
+if ($@) {
+	LOGERR "invalid JSON: $@";
+} else {
+	my @Switches = @{$decoded->{'Hkrs'}};
+	my $i;
+	foreach (@Switches) {
+		if ($i == 0) {
+			$DECTHkrssellist .= '																<option selected value="'.$_->{'AIN'}.'">'.$_->{'name'}."</option>\n";
+		} else {
+			$DECTHkrssellist .= '																<option value="'.$_->{'AIN'}.'">'.$_->{'name'}."</option>\n";
+		}
+	}
+}
+LOGOK "DECT Hkrs list retrieved";
 
 # Get Local IP and GW IP
 LOGINF "retrieve the local ip";
@@ -218,6 +238,7 @@ $maintemplate->param("restartMsg",$restartMsg);
 $maintemplate->param("lxbUser",$lxbUser);
 $maintemplate->param("localip",$localip);
 $maintemplate->param("DECTSwitchessellist",$DECTSwitchessellist);
+$maintemplate->param("DECTHkrssellist", $DECTHkrssellist);
 $maintemplate->param("logdir",$lbplogdir);
 $maintemplate->param("FBusePbno",$FBusePbno);
 $maintemplate->param("FBusePbyes",$FBusePbyes);

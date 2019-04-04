@@ -7,6 +7,8 @@ use IO::Socket;
 use LWP::UserAgent;
 use Time::HiRes;
 use MIME::Base64;
+use LoxBerry::System;
+use LoxBerry::JSON;
 use strict;
  
 our $psubfolder = "REPLACELBPPLUGINDIR";
@@ -29,10 +31,29 @@ my $duration;
 my $Debug;
 my $count;
 my $Name;
+my $mqttplugin;
+my $mqtt;
 
 my $ua = LWP::UserAgent->new;
 
 $Debug = 1;
+ 
+sub isMQTT {
+	$mqttplugin = LoxBerry::System::plugindata("mqttgateway");
+	if ($mqttplugin) {
+		$mqtt = $lbhomedir."/config/plugins/".$mqttplugin->{"PLUGINDB_FOLDER"}."/mqtt.json";
+		my $jsonobj = LoxBerry::JSON->new();
+		$mqttplugin = $jsonobj->open(filename => $mqtt);
+		$mqtt = $mqttplugin->{"Main"}{"udpinport"};
+		$mqtt = `netstat -ul | grep $mqtt`;
+		if ($mqtt) {
+			$mqtt = -1;
+		} else{
+			$mqtt = 0;
+		}
+		return $mqtt;
+	}
+}
 
 sub senddata {
 	my $txudp = shift;
@@ -96,6 +117,25 @@ sub senddata {
 	}
 }
 
+sub sendMQTT($topic,$value) {
+	my $topic = shift;
+	my $value = shift;
+	if (length($topic)) != 0 && length($value) !=0) {
+   	if (isMQTT()) {
+   		my $mqttsock = new IO::Socket::INET (
+   			PeerAddr => "127.0.0.1",
+   			PeerPort => $mqttplugin->{"Main"}{"udpinport"},
+   			Proto => 'udp',
+   			Type => SOCK_DGRAM
+   		);
+   		my $pretopic = "fritzlox/callmonitor/";
+   		$mqttsock->send("$pretopic$topic $value");
+   		$mqttsock->close();
+   		undef($mqttsock);
+   	}
+   }
+}
+
 my $sock;
 
 if ( $FRITZBOX eq "" ) {
@@ -121,49 +161,64 @@ do {
         		);
         		#die "Could not create socket: $!\n" unless $sock;
 	}
+	
+	
 	while(<$sock>) {
 		if ($Debug > 1) {printf "%s",$_;}
 		if ($_ =~ /RING/){
 			($datum,$Command,$ConnID,$Caller,$Recipient,$Line) = split(";", $_);
 			$Recipient =~ s/#//g;
 			$Caller =~ s/#//g;
+			sendMQTT("$ConnID/event", "ring");
+			sendMQTT("$ConnID/recipient", $Recipient);
 			if ($Debug != 0 ) {print "Eingehender Anruf auf Leitung $ConnID.\n";}
 			if ($FBusePhonebook) {
 				if ($Debug != 0) {print "Anrufer auf Leitung $ConnID ermitteln.\n";}
 				$Name = qx(./FBPBgetName $Caller $FBLogin $FBPass $FRITZBOX $PBID);
 				if (length($Name) > 0) {
 					if ($Debug != 0) {print "$Name auf Leitung $ConnID.\n";}
+					sendMQTT("$ConnID/caller", $Name);
 					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Name,$Recipient,$ConnID);
 				} else {
+					sendMQTT("$ConnID/caller", $Caller);
 					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Recipient,$ConnID);
 				}
 			} else {
+				sendMQTT("$ConnID/caller", $Caller);
 				senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;0;1;0",$Caller,$Recipient,$ConnID);
 			}
 		} elsif ($_ =~ /CALL/){
 			($datum,$Command,$ConnID,$extension,$Caller,$Recipient,$Line) = split(";", $_);
 			$Recipient =~ s/#//g;
 			$Caller =~ s/#//g;
+			sendMQTT("$ConnID/event", "call");
+			sendMQTT("$ConnID/caller", $Caller);
 			if ($Debug !=0 ) {print "Ausgehender Anruf auf Leitung $ConnID.\n";}
 			if ($FBusePhonebook) {
 				if ($Debug != 0) {print "Angerufener auf Leitung $ConnID ermitteln.\n";}
 				$Name = qx(./FBPBgetName $Recipient $FBLogin $FBPass $FRITZBOX $PBID);
 				if (length($Name) > 0) {
 					if ($Debug != 0) {print "$Name auf Leitung $ConnID.\n";}
+					sendMQTT("$ConnID/recipient", $Name);
 					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;$extension;3;0",$Caller,$Name,$ConnID);
 				} else {
+					sendMQTT("$ConnID/recipient", $Recipient);
 					senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;$extension;3;0",$Caller,$Recipient,$ConnID);
 				}
 			} else {
+				sendMQTT("$ConnID/recipient", $Recipient);
 				senddata("$datum;callmonitor;$ConnID;$Caller;$Recipient;$Line;$extension;3;0",$Caller,$Recipient,$ConnID);
 			}
 		} elsif ($_ =~ /;CONNECT/){
 			($datum,$Command,$ConnID,$extension,$Caller) = split(";", $_);
 			$Caller =~ s/#//g;
+			sendMQTT("$ConnID/event", "connect");
 			if ($Debug != 0 ) {print "Verbindung auf Leitung $ConnID verbunden.\n";}
 			senddata("$datum;callmonitor;$ConnID;$Caller;0;0;$extension;2;0","-","-",$ConnID);
 		} elsif ($_ =~ /DISCONNECT/){
 			($datum,$Command,$ConnID,$duration) = split(";", $_);
+			sendMQTT("$ConnID/event", "disconnect");
+			sendMQTT("$ConnID/duration", $duration);
 			if ($Debug != 0 ) {print "Verbindung auf Leitung $ConnID beendet.\n";}
 			senddata("$datum;callmonitor;$ConnID;0;0;0;0;4;$duration","-","-",$ConnID);
 		}
