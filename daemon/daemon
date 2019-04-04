@@ -1,5 +1,16 @@
 #!/bin/bash
 
+if [ -h /etc/rsyslog.d/callmonitor.conf ]
+then
+	/bin/rm /etc/rsyslog.d/<new_file>.conf
+else
+	/bin/cat > /etc/rsyslog.d/callmonitor.conf <<EOF
+if $programname == 'callmonitor' then REPLACELBHOMEDIR/log/plugins/REPLACELBPPLUGINDIR/callmonitor.log
+& stop
+EOF
+	/bin/systemctl restart rsyslog
+fi
+
 if [ -h /etc/systemd/system/callmonitor ]
 then
 	/bin/systemctl start callmonitor.service
@@ -9,12 +20,15 @@ else
 Description=the fritzlox callmonitor service
 
 [Service]
-Type=oneshot
+Type=simple
 RemainAfterExit=yes
 #if type=oneshot and RemainAfterExit=yes is not set, then the script stops immediately!
 EnvironmentFile=-/etc/environment
 WorkingDirectory=REPLACELBHOMEDIR/webfrontend/htmlauth/plugins/REPLACELBPPLUGINDIR/bin
-ExecStart=REPLACELBHOMEDIR/webfrontend/htmlauth/plugins/REPLACELBPPLUGINDIR/bin/callmonitor >> REPLACELBHOMEDIR/log/plugins/REPLACELBPPLUGINDIR/callmonitor.log
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=callmonitor
+ExecStart=REPLACELBHOMEDIR/webfrontend/htmlauth/plugins/REPLACELBPPLUGINDIR/bin/callmonitor
 
 [Install]
 WantedBy=multi-user.target
