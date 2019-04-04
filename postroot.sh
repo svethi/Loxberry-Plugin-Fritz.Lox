@@ -22,7 +22,7 @@ fi
 if [ -f "/etc/rsyslog.d/callmonitor.conf" ]
 then
 	
-	echo "<INFO> rsyslog zurücksetzen."
+	echo "<INFO> rsyslog zurÃ¼cksetzen."
 	rm -f "/etc/rsyslog.d/callmonitor.conf"
 	/bin/systemctl restart rsyslog
 fi 
