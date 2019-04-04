@@ -10,16 +10,16 @@ then
 	rm -f "/etc/init.d/callmonitor"
 fi
 
-if [ -f "/etc/systemd/system/callmonitor" ]
+if [ -f "/etc/systemd/system/callmonitor.service" ]
 then
 	
 	echo "<INFO> callmonitor stoppen."
 	/bin/systemctl stop callmonitor.service
-	rm -f "/etc/systemd/system/callmonitor"
+	rm -f "/etc/systemd/system/callmonitor.service"
 	/bin/systemctl daemon-reload
 fi
 
-if [ -f "/etc/rsyslog.d/callmonitor.conf"]
+if [ -f "/etc/rsyslog.d/callmonitor.conf" ]
 then
 	
 	echo "<INFO> rsyslog zurücksetzen."
