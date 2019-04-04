@@ -33,6 +33,7 @@ my $count;
 my $Name;
 my $mqttplugin;
 my $mqtt;
+my $mqttsock;
 
 my $ua = LWP::UserAgent->new;
 
@@ -117,10 +118,10 @@ sub senddata {
 	}
 }
 
-sub sendMQTT($topic,$value) {
+sub sendMQTT {
 	my $topic = shift;
 	my $value = shift;
-	if (length($topic)) != 0 && length($value) !=0) {
+	if (length($topic) != 0 && length($value) !=0) {
    	if (isMQTT()) {
    		my $mqttsock = new IO::Socket::INET (
    			PeerAddr => "127.0.0.1",

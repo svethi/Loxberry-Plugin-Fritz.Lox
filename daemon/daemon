@@ -21,4 +21,4 @@ WantedBy=multi-user.target
 EOF
 	/bin/systemctl daemon-reload
 	/bin/systemctl start callmonitor
-fi;;
+fi
