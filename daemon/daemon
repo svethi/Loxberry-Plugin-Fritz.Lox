@@ -2,11 +2,12 @@
 
 if [ -h /etc/rsyslog.d/callmonitor.conf ]
 then
-	/bin/rm /etc/rsyslog.d/<new_file>.conf
+	/bin/rm /etc/rsyslog.d/callmonitor.conf
 else
 	/bin/cat > /etc/rsyslog.d/callmonitor.conf <<EOF
+$fileOwner loxberry
+$fileGroup loxberry
 if $programname == 'callmonitor' then REPLACELBHOMEDIR/log/plugins/REPLACELBPPLUGINDIR/callmonitor.log
-& stop
 EOF
 	/bin/systemctl restart rsyslog
 fi
