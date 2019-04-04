@@ -1,9 +1,7 @@
 #!/bin/bash
 
-if [ -h /etc/rsyslog.d/callmonitor.conf ]
+if [ ! -f /etc/rsyslog.d/callmonitor.conf ]
 then
-	#/bin/rm /etc/rsyslog.d/callmonitor.conf
-else
 	/bin/cat > /etc/rsyslog.d/callmonitor.conf <<EOF
 \$fileOwner loxberry
 \$fileGroup loxberry
