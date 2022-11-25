@@ -140,7 +140,7 @@ sub sendMQTT {
    	if (isMQTT()) {
    		my $mqttsock = new IO::Socket::INET (
    			PeerAddr => "127.0.0.1",
-   			PeerPort => $mqttplugin->{"Main"}{"udpinport"},
+   			PeerPort => $mqttconn->{"udpinport"},
    			Proto => 'udp',
    			Type => SOCK_DGRAM
    		);
