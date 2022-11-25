@@ -32,7 +32,8 @@ my $duration;
 my $Debug;
 my $count;
 my $Name;
-my $mqttplugin;
+#my $mqttplugin;
+my $mqttconn;
 my $mqtt;
 my $mqttsock;
 
