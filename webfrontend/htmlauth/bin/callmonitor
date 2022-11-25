@@ -9,6 +9,7 @@ use Time::HiRes;
 use MIME::Base64;
 use LoxBerry::System;
 use LoxBerry::JSON;
+use LoxBerry::IO;
 use strict;
  
 our $psubfolder = "REPLACELBPPLUGINDIR";
@@ -39,18 +40,31 @@ my $ua = LWP::UserAgent->new;
 
 $Debug = 1;
  
+#sub isMQTT {
+#	$mqttplugin = LoxBerry::System::plugindata("mqttgateway");
+#	if ($mqttplugin) {
+#		$mqtt = $lbhomedir."/config/plugins/".$mqttplugin->{"PLUGINDB_FOLDER"}."/mqtt.json";
+#		my $jsonobj = LoxBerry::JSON->new();
+#		$mqttplugin = $jsonobj->open(filename => $mqtt);
+#		$mqtt = $mqttplugin->{"Main"}{"udpinport"};
+#		$mqtt = `netstat -ul | grep $mqtt`;
+#		if ($mqtt) {
+#			$mqtt = -1;
+#		} else{
+#			$mqtt = 0;
+#		}
+#		return $mqtt;
+#	}
+#}
+
 sub isMQTT {
-	$mqttplugin = LoxBerry::System::plugindata("mqttgateway");
-	if ($mqttplugin) {
-		$mqtt = $lbhomedir."/config/plugins/".$mqttplugin->{"PLUGINDB_FOLDER"}."/mqtt.json";
-		my $jsonobj = LoxBerry::JSON->new();
-		$mqttplugin = $jsonobj->open(filename => $mqtt);
-		$mqtt = $mqttplugin->{"Main"}{"udpinport"};
-		$mqtt = `netstat -ul | grep $mqtt`;
+	$mqttconn = LoxBerry::IO::mqtt_connectiondetails();
+	if ($mqttconn) {
+		$mqtt = `netstat -ul | grep $mqttconn->{"udpinport"}`;
 		if ($mqtt) {
 			$mqtt = -1;
-		} else{
-			$mqtt = 0;
+		} else {
+			$mqtt =  0;
 		}
 		return $mqtt;
 	}
